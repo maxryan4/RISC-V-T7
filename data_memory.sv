@@ -1,4 +1,4 @@
-module data_memory #(parameter ADDR_WIDTH = 12) (
+module data_memory #(parameter ADDR_WIDTH = 12, parameter FILE_LOAD = 1, parameter FILE = "") (
     input   wire logic                  clk,
 
     input   wire logic                  wen,
@@ -8,9 +8,13 @@ module data_memory #(parameter ADDR_WIDTH = 12) (
     input   wire logic [ADDR_WIDTH-1:0] read_addr,
     output       logic [31:0]           read_data
 );
-
-
     reg [31:0] RAM [0:2**ADDR_WIDTH-1];
+
+    initial begin
+        if (FILE_LOAD) begin
+            $readmemh(FILE, RAM);
+        end
+    end
 
     always_ff @(posedge clk) begin
         RAM[write_addr] <= wen ? write_data : RAM[write_addr];
