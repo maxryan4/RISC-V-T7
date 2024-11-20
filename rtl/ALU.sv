@@ -13,7 +13,7 @@ logic
 always_comb begin
     case (ALUctrl)
         // add
-        4'b?000: ALUout = ALUop1 + ALUop2;
+        4'b0000: ALUout = ALUop1 + ALUop2;
 
         // sub
         4'b1000: ALUout = ALUop1 - ALUop2;
@@ -31,7 +31,7 @@ always_comb begin
         4'b?001: ALUout = ALUop1 << ALUop2[4:0];
 
         // SRL
-        4'b?100: ALUout = ALUop1 >> ALUop2[4:0];
+        4'b0101: ALUout = ALUop1 >> ALUop2[4:0];
 
         // SRA
         4'b1101: ALUout = $signed(ALUop1) >>> ALUop2[4:0];
