@@ -5,7 +5,7 @@ module ALU #(
     input logic [DATA_WIDTH-1:0] ALUop2,
     input logic [3:0] ALUctrl, // {func7[5],func3[2:0]}
     output logic [DATA_WIDTH-1:0] ALUout,
-    output logic EQ, // 1 if branching
+    output logic EQ // 1 if branching
 );
 
 always_comb begin

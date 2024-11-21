@@ -1,4 +1,4 @@
-module top #(
+module pc_top #(
     DATA_WIDTH = 32
 ) (
     input   logic                   clk,
