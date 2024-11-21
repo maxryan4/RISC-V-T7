@@ -8,10 +8,8 @@ module ALU #(
     output logic EQ, // 1 if branching
 );
 
-logic 
-
 always_comb begin
-    case (ALUctrl)
+    casez (ALUctrl)
         // add
         4'b0000: ALUout = ALUop1 + ALUop2;
 
@@ -47,7 +45,7 @@ always_comb begin
 end
 
 always_comb begin
-    case(ALUctrl{2:0})
+    case(ALUctrl[2:0])
         // BEQ (branch if equal)
         3'b000: EQ = ALUop1 == ALUop2;
 
@@ -67,6 +65,6 @@ always_comb begin
         3'b111: EQ = ALUop1 >= ALUop2;
 
         default: EQ = 1'b0;
-
+    endcase
 end
 endmodule
