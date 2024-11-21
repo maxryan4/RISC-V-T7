@@ -6,6 +6,7 @@ module mux #(
     input   logic                   sel,
     output  logic [DATA_WIDTH-1:0]  out
 );
+
     assign out = sel ? in1 : in0;
 
 endmodule
