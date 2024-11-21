@@ -10,7 +10,7 @@ module register_file #(
     input logic [DATA_WIDTH-1:0] WD3,
     output logic [DATA_WIDTH-1:0] RD1,
     output logic [DATA_WIDTH-1:0] RD2,
-    output logic [DATA_WIDTH-1:0] a0,
+    output logic [DATA_WIDTH-1:0] a0
 );
 
 logic [DATA_WIDTH-1:0] register_array [2**ADDRESS_WIDTH-1:0];

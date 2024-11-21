@@ -1,4 +1,4 @@
-module data_memory #(parameter ADDR_WIDTH = 12, parameter FILE_LOAD = 1, parameter FILE = "") (
+module data_memory #(parameter ADDR_WIDTH = 12, parameter FILE_LOAD = 0, parameter FILE = "") (
     input   wire logic                  clk,
 
     input   wire logic                  wen,
