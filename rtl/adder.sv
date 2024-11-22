@@ -9,3 +9,4 @@ module adder #(
 assign out = in0 + in1;
 
 endmodule
+

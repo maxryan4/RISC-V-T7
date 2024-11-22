@@ -11,7 +11,6 @@ module top #(
   // labels are (mostly) the exact same as the diagram on github.
    /* verilator lint_off UNUSED */ 
   logic [DATA_WIDTH-1:0] PC;
-   /* verilator lint_on UNUSED */ 
   logic [DATA_WIDTH-1:0] instr;
   logic [DATA_WIDTH-1:0] ImmOp;
   logic EQ;
@@ -28,7 +27,12 @@ module top #(
   logic RegWrite;
   logic ALUsrc;
   logic PCsrc;
-  /* verilator lint_off UNUSED */ 
+  logic [2:0] memCtrl;
+  logic MemWrite;
+  logic UI_control;
+  logic RD1_control;
+  logic PC_RD1_control;
+  logic four_imm_control;
   logic [11:0] read_addr;
   /* verilator lint_on UNUSED */ 
 
@@ -54,7 +58,13 @@ module top #(
     .ALUsrc(ALUsrc),
     .ImmSrc(ImmSrc),
     .PCsrc(PCsrc),
-    .destsrc(destsrc)
+    .destsrc(destsrc),
+    .memCtrl(memCtrl),
+    .MemWrite(MemWrite),
+    .UI_control(UI_control),
+    .RD1_control(RD1_control),
+    .PC_RD1_control(PC_RD1_control),
+    .four_imm_control(four_imm_control)
   );
   wire [31:0] regfile_dest_data;
   register_file reg_file (
@@ -110,6 +120,7 @@ module top #(
   assign rs2 = instr[24:20];
   assign rd = instr[11:7];
   assign read_addr = PC[11:0];
+  assign memCtrl = instr[14:12];
 
 
 endmodule

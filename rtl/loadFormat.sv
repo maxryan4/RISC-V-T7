@@ -24,3 +24,4 @@ module loadFormat (
 
     assign memData = memCtrl[2] ? sign_extended_val : select;
 endmodule
+

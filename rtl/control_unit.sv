@@ -1,6 +1,8 @@
 module control_unit (
     input wire EQ,
+  /* verilator lint_off UNUSED */ 
     input wire [31:0] instr,
+  /* verilator lint_on UNUSED */ 
     output logic RegWrite,
     output logic [3:0] ALUctrl,
     output logic ALUsrc,
@@ -132,3 +134,4 @@ module control_unit (
     end
 
 endmodule
+

@@ -1,5 +1,8 @@
 module sign_extend (
+
+  /* verilator lint_off UNUSED */ 
     input wire [31:0] instruction,
+  /* verilator lint_on UNUSED */ 
     input wire [2:0] immsrc,
     output logic [31:0] immop
 );
@@ -15,3 +18,4 @@ module sign_extend (
         endcase
     end
 endmodule
+
