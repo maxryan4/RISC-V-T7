@@ -47,23 +47,23 @@ for file in "${files[@]}"; do
                 -o Vdut \
                 -LDFLAGS "-lgtest -lgtest_main -lpthread" \
 
-    # Build C++ project with automatically generated Makefile
-    make -j -C obj_dir/ -f Vdut.mk
-    
-    # Run executable simulation file
-    ./obj_dir/Vdut
-    
-    # Check if the test succeeded or not
-    if [ $? -eq 0 ]; then
-        ((passes++))
-    else
-        ((fails++))
-    fi
-    
-done
+      # Build C++ project with automatically generated Makefile
+      make -j -C obj_dir/ -f Vdut.mk
+      
+      # Run executable simulation file
+      ./obj_dir/Vdut
+      
+      # Check if the test succeeded or not
+      if [ $? -eq 0 ]; then
+          ((passes++))
+      else
+          ((fails++))
+      fi
+      
+  done
 
-# Exit as a pass or fail (for CI purposes)
-if [ $fails -eq 0 ]; then
+  # Exit as a pass or fail (for CI purposes)
+  if [ $fails -eq 0 ]; then
     echo "${GREEN}Success! All ${passes} test(s) passed!"
     exit 0
 else
