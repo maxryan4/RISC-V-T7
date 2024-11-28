@@ -43,6 +43,7 @@ public:
         for (int i = 0; i < max_cycles; i++)
         {
             runSimulation(1);
+            // checking if a0 is the expected output
             if (top->a0 == expected_output)
             {
                 SUCCEED();

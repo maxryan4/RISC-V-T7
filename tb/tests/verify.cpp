@@ -17,14 +17,17 @@ protected:
 
 TEST_F(CpuTestbench, BaseProgramTest)
 {
+  // method which compiles an asm file and stores the result in tests directory
     compile("asm/program.S");
 
     bool success = false;
+  // test is a method which runs the cpu for a certain number of clock cycles and stops when a0 = first argument (254)
+  // every asm file is programmed in such a way that a0 = 254 only when the code works exactly as expected.
     success = test(254, CYCLES); 
 
     if (success)
     {
-      SUCCEED() << "Counter reached 254";
+      SUCCEED();
     } else
     {
         FAIL() << "Counter did not reach 254";
@@ -40,7 +43,7 @@ TEST_F(CpuTestbench, BranchProgramTest)
 
     if (success)
     {
-      SUCCEED() << "All 6 tests were passed during branching.";
+      SUCCEED();
     } 
     else
     { 
@@ -57,7 +60,7 @@ TEST_F(CpuTestbench, ArithmeticTest)
 
     if (success)
     {
-      SUCCEED() << "All 5 tests were passed during arithmetic.";
+      SUCCEED();
     } 
     else
     { 
@@ -74,7 +77,7 @@ TEST_F(CpuTestbench, ShiftTest)
 
     if (success)
     {
-      SUCCEED() << "All 5 tests were passed during logical shifts.";
+      SUCCEED();
     } 
     else
     { 
@@ -91,11 +94,11 @@ TEST_F(CpuTestbench, LoadingAndJumpingTest)
 
     if (success)
     {
-      SUCCEED() << "All 5 tests were passed during loading and jump tests.";
+      SUCCEED();
     } 
     else
     { 
-      FAIL() << "5 tests were not passed during during loading and jump tests.";
+      FAIL() << "4 tests were not passed during during loading and jump tests.";
     }
 }
 // Note this is how we are going to test your CPU. Do not worry about this for

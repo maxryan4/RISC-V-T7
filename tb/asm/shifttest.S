@@ -56,3 +56,5 @@ srl_passed:
 
 sra_passed:
     addi a0, a0, 1  # Incrementing a0
+
+  #expected output is 5

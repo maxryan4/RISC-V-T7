@@ -47,4 +47,4 @@ lw_passed:
     beq t2, t3, lui_passed
 lui_passed:
     addi a0, a0, 1  # Incrementing a0
-  # expected output = 5
+  # expected output = 4
