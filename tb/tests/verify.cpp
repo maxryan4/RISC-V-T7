@@ -69,6 +69,27 @@ TEST_F(CpuTestbench, ArithmeticTest)
     }
 }
 
+
+
+TEST_F(CpuTestbench, LoadingAndJumpingTest)
+{
+    compile("asm/loadingandjump.S");
+
+    bool success = false;
+    success = test(4, CYCLES); 
+
+    if (success)
+    {
+      SUCCEED();
+    } 
+    else
+    { 
+      FAIL() << "4 tests were not passed during loading and jump tests.";
+    }
+}
+
+
+
 TEST_F(CpuTestbench, ShiftTest)
 {
     compile("asm/shifttest.S");
@@ -86,12 +107,12 @@ TEST_F(CpuTestbench, ShiftTest)
     }
 }
 
-TEST_F(CpuTestbench, LoadingAndJumpingTest)
+TEST_F(CpuTestbench, ImmediateTesting)
 {
-    compile("asm/loadingandjump.S");
+    compile("asm/immediatetest.S");
 
     bool success = false;
-    success = test(4, CYCLES); 
+    success = test(9, CYCLES); 
 
     if (success)
     {
@@ -99,7 +120,7 @@ TEST_F(CpuTestbench, LoadingAndJumpingTest)
     } 
     else
     { 
-      FAIL() << "4 tests were not passed during during loading and jump tests.";
+      FAIL() << "9 tests were not passed during immediate testing";
     }
 }
 // Note this is how we are going to test your CPU. Do not worry about this for

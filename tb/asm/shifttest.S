@@ -13,6 +13,7 @@ _start:
     sll t2, t0, t1  # t2 = 4 ^ 2
     li t3, 16       # Expected result = 16
     beq t2, t3, sll_passed
+    j stop
   
 sll_passed:
     addi a0, a0, 1  # Incrementing a0 for every test that is passed
@@ -23,6 +24,7 @@ sll_passed:
     slt t2, t0, t1  # t2 = (t0 < t1)
     li t3, 1        # Expected result = 1
     beq t2, t3, slt_passed
+    j stop
 
 slt_passed:
     addi a0, a0, 1  # Incrementing a0
@@ -33,6 +35,7 @@ slt_passed:
     sltu t2, t0, t1 # t2 = (t0 < t1)
     li t3, 1        # Expected result = 1
     beq t2, t3, sltu_passed
+    j stop
 
 sltu_passed:
     addi a0, a0, 1  # Incrementing a0
@@ -43,6 +46,7 @@ sltu_passed:
     srl t2, t0, t1  # t2 = 16/(2^2) (logical shift)
     li t3, 4        # Expected result = 4
     beq t2, t3, srl_passed
+    j stop
 
 srl_passed:
     addi a0, a0, 1  # Incrementing a0
@@ -53,7 +57,10 @@ srl_passed:
     sra t2, t0, t1  # t2 = -16/(2^2) (arithmetic shift)
     li t3, -4       # Expected result = -4
     beq t2, t3, sra_passed
+    j stop
 
 sra_passed:
     addi a0, a0, 1  # Incrementing a0
   #expected output is 5
+stop:
+    j stop

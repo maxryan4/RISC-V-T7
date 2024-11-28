@@ -10,36 +10,46 @@ _start:
 
     # passeding beq
     beq t0, t2, beq_passed
+    j stop
    
 beq_passed:
     addi a0, a0, 1  # a0++
 
     # passed bne (branch if not equal)
     bne t0, t1, bne_passed
+    j stop
 
 bne_passed:
     addi a0, a0, 1  # a0++
 
     # passed blt (branch if less than)
     blt t0, t1, blt_passed
+    j stop
 blt_passed:
     addi a0, a0, 1  # a0++
 
 
     # passed bge (branch if greater than or equal)
     bge t1, t0, bge_passed
+    j stop
 bge_passed:
     addi a0, a0, 1  # a0++
 
     # passed bltu (branch if less than, unsigned)
     bltu t0, t1, bltu_passed
+    j stop
 bltu_passed:
     addi a0, a0, 1  # a0++
 
     # passed bgeu (branch if greater than or equal, unsigned)
     bgeu t1, t0, bgeu_passed
+    j stop
 bgeu_passed:
     addi a0, a0, 1  # a0++
+  
 
 
-    #expected output is 6 since there are 6 passeds to pass 
+#expected output is 6 since there are 6 passeds to pass 
+
+stop:
+    j stop
