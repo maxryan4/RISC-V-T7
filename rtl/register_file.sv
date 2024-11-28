@@ -29,3 +29,4 @@ end
 assign a0 = register_array[10];
 
 endmodule
+

@@ -22,3 +22,4 @@ module data_memory #(parameter ADDR_WIDTH = 12, parameter FILE_LOAD = 0, paramet
 
     assign read_data = RAM[read_addr];
 endmodule
+
