@@ -28,3 +28,4 @@ module data_memory #(parameter ADDR_WIDTH = 12, parameter FILE_LOAD = 0, paramet
     load_format load_formatter (RAM[addr_i[ADDR_WIDTH-1:2]], addr_i[1:0], mem_ctrl, data_o);
     store_format store_formatter (data_i, addr_i[1:0], mem_ctrl[1:0], write_data, write_mask);
 endmodule
+

@@ -58,6 +58,7 @@ riscv64-unknown-elf-objdump -f -d --source -m riscv \
 od -v -An -t x1 "a.bin" | tr -s '\n' | awk '{$1=$1};1' > "${output_file}"
 
 
+
 final_file="tests/program.hex"
 touch "${final_file}"
 # Clear the output file before appending new data
@@ -69,10 +70,11 @@ while read -r line; do
     # Split the line into words and loop through them
     words=($line)
     for ((i = 0; i < ${#words[@]} - 3; i+=4)); do
-        # Print the next 4 words
+        # Write the next 8 hex digits to the file
         echo "${words[i+3]}${words[i+2]}${words[i+1]}${words[i]}" >> "${final_file}"
     done
 
+# read through the output file.
 done < "${output_file}"
 
 
