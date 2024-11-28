@@ -23,6 +23,7 @@ TEST_F(CpuTestbench, BaseProgramTest)
     bool success = false;
   // test is a method which runs the cpu for a certain number of clock cycles and stops when a0 = first argument (254)
   // every asm file is programmed in such a way that a0 = 254 only when the code works exactly as expected.
+
     success = test(254, CYCLES); 
 
     if (success)
