@@ -1,0 +1,32 @@
+.section .text
+.globl _start
+
+_start:
+    # Initialize registers
+    li a0, 0        # Initialize a0
+
+    la t0, 0x10           #t0 initialised at address 0x10
+
+    # Step 2: Store a byte value into 'buffer'
+    li t1, 0x7F             # Load 0x7F (127 in decimal) into t1
+    sb t1, 0(t0)            # Store the least significant byte of t1 into buffer
+
+    # Step 3: Load the stored byte back into a register
+    lb t2, 0(t0)            # Load the signed byte from buffer into t2
+
+        beq t2, t3, lw_passed
+    j stop
+lw_passed:
+    addi a0, a0, 1  # Incrementing a0
+
+    # Testing lui (Load Upper Immediate again)
+    lui t2, 0x11100  # t2 = 0x1110000
+    li t3, 0x11100000 # Expected result = 0x11100000
+    beq t2, t3, lui_passed
+    j stop
+lui_passed:
+    addi a0, a0, 1  # Incrementing a0
+  # expected output = 1
+
+stop:
+    j stop

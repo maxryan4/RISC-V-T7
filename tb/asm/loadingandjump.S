@@ -7,7 +7,7 @@ _start:
     li t0, 0        # 
     li t1, 0        # 
     li t2, 0        # temporary registers for calculations
-    li t3, 0        
+    li t3, 0
 
     # Test auipc (Add Upper Immediate to PC)
     auipc t2, 0 # PC = 20 (since there have been 5 instructions) = 0x14

@@ -8,6 +8,7 @@ module load_format (
     localparam HALFWORD = 2'b01;
     logic [31:0] select;
 
+
     logic [7:0] select_byte;
     assign select_byte = addr_low[1:0]==2'b00 ? read_data[7:0] :
                          addr_low[1:0]==2'b01 ? read_data[15:8]: 
@@ -16,11 +17,10 @@ module load_format (
 
     logic [15:0] select_halfbyte;
     assign select_halfbyte = addr_low[1] ? read_data[31:16] : read_data[15:0];
-    
-    assign select = mem_ctrl[1:0]==BYTE ? {24'h0,select_byte} : mem_ctrl[1:0]==HALFWORD ? {16'h0, select_halfbyte} : read_data;
 
-    logic [31:0] sign_extended_val;
-    assign sign_extended_val = mem_ctrl[0] ? {{16{select[15]}}, select[15:0]} : {{24{select[7]}}, select[7:0]};
+    logic invert;
+    assign invert = !mem_ctrl[2] && ((mem_ctrl[1:0] == HALFWORD) && select_halfbyte[15] || ((mem_ctrl[1:0] == BYTE) && select_byte[7]));
+    assign select = mem_ctrl[1:0]==BYTE ? {24{invert},select_byte} : mem_ctrl[1:0]==HALFWORD ? {16{invert}, select_halfbyte} : read_data;
 
-    assign mem_data = mem_ctrl[2] ? sign_extended_val : select;
+    assign mem_data = select;
 endmodule
