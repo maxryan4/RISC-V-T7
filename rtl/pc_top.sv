@@ -5,6 +5,8 @@ module pc_top #(
     input   logic                   rst,
     input   logic                   PCsrc,
     input   logic [DATA_WIDTH-1:0]  ImmOp,
+    input   logic [DATA_WIDTH-1:0]  RS1,
+    input   logic                   PCaddsrc,
     output  logic [DATA_WIDTH-1:0]  PC    
 );
 
@@ -26,9 +28,15 @@ module pc_top #(
         .in1(32'd4),
         .out(inc_PC)
     );
-
+    logic [DATA_WIDTH-1:0] PC_fin;
+    mux mux3 (
+      .in0(RS1),
+      .in1(PC),
+      .sel(PCaddsrc),
+      .out(PC_fin)
+    );
     adder pc_branch (
-        .in0(PC),
+        .in0(PC_fin),
         .in1(ImmOp),
         .out(branch_PC)
     );
@@ -39,6 +47,6 @@ module pc_top #(
         .sel(PCsrc),
         .out(next_PC)
     );
-
+    
 endmodule
 

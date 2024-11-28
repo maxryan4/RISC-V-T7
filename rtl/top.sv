@@ -40,6 +40,8 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
+    .RS1(ALUop1),
+    .PCaddsrc(PC_RD1_control),
     .PCsrc(PCsrc),
     .ImmOp(ImmOp),
     .PC(PC)
