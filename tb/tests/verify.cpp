@@ -123,6 +123,22 @@ TEST_F(CpuTestbench, ImmediateTesting)
       FAIL() << "9 tests were not passed during immediate testing";
     }
 }
+TEST_F(CpuTestbench, LoadByteTesting)
+{
+    compile("asm/loadbytetest.S");
+
+    bool success = false;
+    success = test(4, CYCLES); 
+
+    if (success)
+    {
+      SUCCEED();
+    } 
+    else
+    { 
+      FAIL() << "4 tests were not passed during byte loading tests.";
+    }
+}
 // Note this is how we are going to test your CPU. Do not worry about this for
 // now, as it requires a lot more instructions to function
 /*
