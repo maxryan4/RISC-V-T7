@@ -60,7 +60,6 @@ module top #(
     .read_data(instr_f)
   );
 
-  // not finished
   fetch_reg_file fetch_reg_file (
     .clk(clk),
     .read_data_f(instr_f),
@@ -68,7 +67,7 @@ module top #(
     .PC_f(PC_f),
     .PC_d(PC_d),
     .PCPlus4_f(PCPlus4_f),
-    .PCPlus4_d(PCPlus4_d),
+    .PCPlus4_d(PCPlus4_d)
   );
 
   control_unit control_unit (

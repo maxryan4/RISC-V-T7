@@ -1,4 +1,4 @@
-// not finished
+// need to add way to flush 
 module fetch_reg_file #(
     parameter DATA_WIDTH = 32
 )(
