@@ -13,8 +13,7 @@ module mem_reg_file #(
     output logic [DATA_WIDTH-1:0]       ALUResult_w,
     output logic [DATA_WIDTH-1:0]       ReadData_w,
     output logic                        RegWrite_w,
-    output logic [1:0]                  ResultSrc_w,
-
+    output logic [1:0]                  ResultSrc_w
 );
 
 always_ff @(posedge clk) begin
