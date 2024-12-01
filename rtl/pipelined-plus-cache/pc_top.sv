@@ -7,12 +7,13 @@ module pc_top #(
     input   logic [DATA_WIDTH-1:0]  ImmOp,
     input   logic [DATA_WIDTH-1:0]  RS1,
     input   logic                   PCaddsrc,
-    output  logic [DATA_WIDTH-1:0]  PC    
+    output  logic [DATA_WIDTH-1:0]  PC,
+    output  logic [DATA_WIDTH-1:0]  inc_PC
 );
 
     // internal signals
     logic [DATA_WIDTH-1:0] branch_PC;
-    logic [DATA_WIDTH-1:0] inc_PC;
+    // logic [DATA_WIDTH-1:0] inc_PC;
     logic [DATA_WIDTH-1:0] next_PC;
 
     // instantiating modules

@@ -10,8 +10,12 @@ module top #(
   // every PCat is carried from one module to another
   // labels are (mostly) the exact same as the diagram on github.
    /* verilator lint_off UNUSED */ 
-  logic [DATA_WIDTH-1:0] PC;
-  logic [DATA_WIDTH-1:0] instr;
+  logic [DATA_WIDTH-1:0] PC_f;
+  logic [DATA_WIDTH-1:0] PC_d;
+  logic [DATA_WIDTH-1:0] instr_f;
+  logic [DATA_WIDTH-1:0] instr_d;
+  logic [DATA_WIDTH-1:0] PCPlus4_f;
+  logic [DATA_WIDTH-1:0] PCPlus4_d;
   logic [DATA_WIDTH-1:0] ImmOp;
   logic EQ;
   logic [2:0] ImmSrc;
@@ -47,21 +51,29 @@ module top #(
     .PCaddsrc(PC_RD1_control),
     .PCsrc(PCsrc),
     .ImmOp(ImmOp),
-    .PC(PC)
+    .PC(PC_f),
+    .inc_PC(PCPlus4_f)
   );
 
   instruction_memory instruction_memory (
     .read_addr(read_addr[11:2]),
-    .read_data(instr)
+    .read_data(instr_f)
   );
 
-  always_ff @(posedge clk) begin
-    
-  end
+  // not finished
+  fetch_reg_file fetch_reg_file (
+    .clk(clk),
+    .read_data_f(instr_f),
+    .read_data_d(instr_d),
+    .PC_f(PC_f),
+    .PC_d(PC_d),
+    .PCPlus4_f(PCPlus4_f),
+    .PCPlus4_d(PCPlus4_d),
+  );
 
   control_unit control_unit (
     .EQ(EQ),
-    .instr(instr),
+    .instr(instr_d),
     .RegWrite(RegWrite),
     .ALUctrl(ALUctrl),
     .ALUsrc(ALUsrc),
@@ -127,7 +139,7 @@ module top #(
   
 
   sign_extend sign_extend (
-    .instruction(instr),
+    .instruction(instr_d),
     .immsrc(ImmSrc),
     .immop(ImmOp)
   );
@@ -160,4 +172,3 @@ module top #(
 
 
 endmodule
-
