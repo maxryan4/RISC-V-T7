@@ -55,6 +55,10 @@ module top #(
     .read_data(instr)
   );
 
+  always_ff @(posedge clk) begin
+    
+  end
+
   control_unit control_unit (
     .EQ(EQ),
     .instr(instr),
