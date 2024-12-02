@@ -46,7 +46,7 @@ module wb_mem #(parameter WB_AW = 12, parameter WB_DW = 32, parameter FILE_LOAD 
     end
 for (genvar i = 0; i < WB_SL; i++) begin : _write_ram_per_bitmask
     always_ff @(posedge clk_i) begin
-        if (wb_sel_i[i]) begin
+        if (wb_cyc_i&wb_stb_i&wb_sel_i[i]) begin
             RAM[wb_adr_i][8*(i+1)-1:8*i] <= wb_dat_i[8*(i+1)-1:8*i];
         end
     end
