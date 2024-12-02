@@ -51,6 +51,10 @@ module control_unit (
             7'b0010011:begin//imme
                 RegWrite=1;
                 ALUctrl={1'b0,instr[14:12]};
+                // in the unique case of srai, the MSB is non zero.
+                if (instr[14:12] == 3'b101) begin
+                    ALUctrl[3] = instr[30];
+                end
                 ALUsrc=1;
                 ImmSrc=0;
                 PCsrc=0;

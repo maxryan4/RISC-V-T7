@@ -17,7 +17,6 @@ module top #(
   logic [2:0] ImmSrc;
   logic [DATA_WIDTH-1:0] ALUop1;
   logic [DATA_WIDTH-1:0] ALUop2;
-  logic [DATA_WIDTH-1:0] regOp2;
   logic [3:0] ALUctrl;
   logic [DATA_WIDTH-1:0] ALUout;
   logic [ADDRESS_WIDTH-1:0] rs1;
@@ -31,8 +30,12 @@ module top #(
   logic MemWrite;
   logic UI_control;
   logic RD1_control;
+  logic [DATA_WIDTH-1:0] RD1;
+  logic [DATA_WIDTH-1:0] RD2;
   logic PC_RD1_control;
   logic four_imm_control;
+  logic [DATA_WIDTH-1:0] Imm;
+  logic [DATA_WIDTH-1:0] UI_out;
   logic [11:0] read_addr;
   /* verilator lint_on UNUSED */ 
 
@@ -40,6 +43,8 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
+    .RS1(RD1),
+    .PCaddsrc(PC_RD1_control),
     .PCsrc(PCsrc),
     .ImmOp(ImmOp),
     .PC(PC)
@@ -74,14 +79,35 @@ module top #(
     .AD3(rd),
     .WE3(RegWrite),
     .WD3(regfile_dest_data),
-    .RD1(ALUop1),
-    .RD2(regOp2),
+    .RD1(RD1),
+    .RD2(RD2),
     .a0(a0)
   );
 
-  mux mux (
-      .in0(regOp2),
+  mux ImmMux(
+      .in0(32'd4),
       .in1(ImmOp),
+      .sel(four_imm_control),
+      .out(Imm)
+  );
+  
+  mux UIMux(
+      .in0(32'b0),  
+      .in1(PC),
+      .sel(UI_control),
+      .out(UI_out)
+  );
+
+  mux Op1Mux(
+      .in0(UI_out),  
+      .in1(RD1),
+      .sel(RD1_control),
+      .out(ALUop1)
+  );
+
+  mux Op2Mux(
+      .in0(RD2),
+      .in1(Imm),
       .sel(ALUsrc),
       .out(ALUop2)
   );
@@ -102,8 +128,14 @@ module top #(
     .immop(ImmOp)
   );
   wire [31:0] data_out;
+
   data_memory data_memory (
-    .clk(clk), .wen(destsrc), .write_data(regOp2), .write_addr(ALUout[11:0]), .read_addr(ALUout[11:0]), .read_data(data_out)
+    .clk(clk),
+    .mem_write(MemWrite),
+    .mem_ctrl(memCtrl),
+    .data_i(RD2),
+    .addr_i(ALUout[11:0]),
+    .data_o(data_out)
   );
 
 
