@@ -1,4 +1,3 @@
-// not finished
 module mem_reg_file #(
     parameter DATA_WIDTH = 32
 )(
