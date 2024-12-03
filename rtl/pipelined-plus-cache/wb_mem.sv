@@ -11,7 +11,7 @@ module wb_mem #(parameter WB_AW = 12, parameter WB_DW = 32, parameter FILE_LOAD 
 
     output       logic              wb_stall_o,
     output       logic              wb_ack_o,
-    output       logic [31:0]       wb_dat_o,
+    output       logic [WB_DW-1:0]  wb_dat_o,
     output       logic              wb_err_o
 );
     reg [WB_DW-1:0] RAM[0:(2**WB_AW)-1];
