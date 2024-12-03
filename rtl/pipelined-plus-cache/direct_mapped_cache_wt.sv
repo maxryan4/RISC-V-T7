@@ -1,6 +1,6 @@
-module direct_mapped_cache #(
-    parameter SETS = 16,
-    parameter CACHE_LINE_SIZE_MULT_POW2 = 0,
+module direct_mapped_cache_wt #(
+    parameter SETS = 64,
+    parameter CACHE_LINE_SIZE_MULT_POW2 = 2,
     parameter AW = 12,
     localparam SL = 4,
     localparam RAM_SZ = (SETS*(2**CACHE_LINE_SIZE_MULT_POW2)),
@@ -9,19 +9,25 @@ module direct_mapped_cache #(
     input   wire logic              cpu_clock_i,
 
     // CPU interface in (note does not include bottom two bits of address)
-    input   wire logic [AW+1:0]     cpu_addr_i,
-    input   wire logic [31:0]       cpu_data_i,
-    input   wire logic [2:0]        cpu_mem_ctrl_i,
-    input   wire logic              cpu_mem_write_i,
-    input   wire logic              cpu_valid_i,
+    input   wire logic [AW+1:0]     cpu_addr_i, // Address of data to access
+    input   wire logic [31:0]       cpu_data_i, // CPU Data in, used in stores
+    input   wire logic [2:0]        cpu_mem_ctrl_i, // instr[14:12]
+    input   wire logic              cpu_mem_write_i, // if CPU is requesting a write
+    input   wire logic              cpu_valid_i, // if a memory operation is being executed that cycle
+    /**
+        Note:
+            When using this cache, data is valid, and may be forwarded to the writeback stage, IFF 
+                !cpu_stall_o
+            when cpu_stall_o is high, all subsequent stages must be stalled.
+    **/
     // Backing memory in
-    input   wire logic              wb_stall_i,
-    input   wire logic              wb_ack_i,
-    input   wire logic [31:0]       wb_dat_i,
-    input   wire logic              wb_err_i,
+    input   wire logic              wb_stall_i, // Wishbone signal: stall_i
+    input   wire logic              wb_ack_i, // Wishbone signal: acknowledgment
+    input   wire logic [31:0]       wb_dat_i, // Wishbone signal: data in (used for cache fills)
+    input   wire logic              wb_err_i, // Wishbone signal: error (should never be high)
     // CPU interface out
-    output       logic [31:0]       cpu_data_o,
-    output       logic              cpu_stall_o,
+    output       logic [31:0]       cpu_data_o, // CPU Data out, formatted for the registers already
+    output       logic              cpu_stall_o, // IFF this signal is high, then the rest of the stages in the CPU **MUST** be stalled
     // Backing memory out
     output       logic              wb_cyc_o,
     output       logic              wb_stb_o,
@@ -40,6 +46,7 @@ module direct_mapped_cache #(
     wire  [3:0]                  cache_wr;
     wire  [3:0]                  cpu_cache_wr;
     wire                         fill_end_condition;
+    wire                         fill_pend_condition;
     wire  [31:0]                 cpu_wr_data;
     wire  [31:0]                 ram_wr_data;
     logic [31:0]                 ram_data;
@@ -84,10 +91,11 @@ module direct_mapped_cache #(
     store_format sf0 (cpu_data_i, cpu_addr_i[1:0], cpu_mem_ctrl_i[1:0], cpu_wr_data, cpu_cache_wr);
 
     
-    generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
+    generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : ___if_no_spatial
         assign fill_end_condition = 1'b1;
         assign fill_addr = cpu_set;
-    end else begin : __if_spatial
+        assign fill_pend_condition = 1'b1;
+    end else begin : ___if_spatial
         reg [CACHE_LINE_SIZE_MULT_POW2-1:0] counter = '0;
         always_ff @(posedge cpu_clock_i) begin
             if ((cache_state==CACHE_FILL)&&wb_ack_i) begin
@@ -96,6 +104,7 @@ module direct_mapped_cache #(
         end
         assign fill_end_condition = counter == {CACHE_LINE_SIZE_MULT_POW2{1'b1}};
         assign fill_addr = {cpu_set, counter};
+        assign fill_pend_condition = wb_adr_o[CACHE_LINE_SIZE_MULT_POW2-1:0]=={CACHE_LINE_SIZE_MULT_POW2{1'b1}};
     end endgenerate
 
     always_ff @(posedge cpu_clock_i) begin
@@ -111,26 +120,27 @@ module direct_mapped_cache #(
                     wb_we_o <= 1'b1;
                 end else if (cpu_stall_o&!cpu_mem_write_i) begin
                     cache_state <= CACHE_FILL;
-                    wb_adr_o <= cpu_addr_i[AW+1:2];
+                    wb_adr_o <= {cpu_addr_i[AW+1:2+CACHE_LINE_SIZE_MULT_POW2], {CACHE_LINE_SIZE_MULT_POW2{1'b0}}};
                     wb_cyc_o <= 1'b1;
                     wb_stb_o <= 1'b1;
-                    wb_dat_o <= cpu_wr_data;
-                    wb_sel_o <= cache_wr;
-                    wb_we_o <= 1'b1;
+                    wb_sel_o <= '0;
+                    wb_we_o <= 1'b0;
                 end
             end
             CACHE_FILL: begin
-                if (!wb_stall_i & !(wb_ack_i&!fill_end_condition)) begin
-                    wb_stb_o <= 1'b0;
+                if (!wb_stall_i) begin
+                    if (!fill_pend_condition) begin
+                        wb_stb_o <= 1'b1;
+                        wb_adr_o <= wb_adr_o + 1;
+                    end else begin
+                        wb_stb_o <= 1'b0;
+                    end
                 end
                 if (wb_ack_i&fill_end_condition) begin
                     tags[cpu_set] <= cpu_tag;
                     valid[cpu_set] <= 1'b1;
                     wb_cyc_o <= 1'b0;
                     cache_state <= CACHE_IDLE;
-                end else if (wb_ack_i&!fill_end_condition) begin
-                    wb_adr_o <= wb_adr_o + 1;
-                    wb_stb_o <= 1'b1;
                 end
             end
             CACHE_WRITE: begin
@@ -147,7 +157,7 @@ module direct_mapped_cache #(
     
     for (genvar k = 0; k < 4; k++) begin : __ram_write
         always_ff @(posedge cpu_clock_i) begin
-            if (wb_ack_i&cache_wr[k]) begin
+            if (cache_wr[k]) begin
                 cache_ram[ram_wr_addr][((k+1)*8)-1:k*8] <= ram_wr_data[((k+1)*8)-1:k*8];
             end
         end
