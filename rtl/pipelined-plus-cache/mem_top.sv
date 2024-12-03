@@ -1,4 +1,4 @@
-module wb_top #(parameter AW = 12) (
+module mem_top #(parameter AW = 12) (
     input   wire logic              cpu_clock_i,
 
     // CPU interface in (note does not include bottom two bits of address)
