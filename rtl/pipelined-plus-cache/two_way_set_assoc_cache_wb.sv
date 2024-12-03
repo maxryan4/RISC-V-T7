@@ -1,4 +1,4 @@
-module two_way_set_assoc_wb #(
+module two_way_set_assoc_cache_wb #(
     parameter SETS = 32,
     parameter CACHE_LINE_SIZE_MULT_POW2 = 1,
     parameter AW = 12,
