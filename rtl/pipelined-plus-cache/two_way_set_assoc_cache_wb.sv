@@ -74,6 +74,7 @@ module two_way_set_assoc_cache_wb #(
     wire  [TAG_W-1:0]            replacement_tag;
     wire replacement_is_dirty;
     wire replacement_enc;
+    wire                         mru_read;
     assign ram_wr_data = cache_fill ? wb_dat_i : cpu_wr_data;
     assign cache_wr = cache_fill ? {4{wb_ack_i&!wb_err_i}} : {cpu_cache_wr&{4{cpu_mem_write_i}}&{4{(|cpu_match)}}};
     assign cache_fill = cache_state==CACHE_FILL;
@@ -100,17 +101,12 @@ module two_way_set_assoc_cache_wb #(
     assign valid1_read = valid1[cpu_set];
     assign dirty1_read = dirty1[cpu_set];
 
+    assign mru_read = mru[cpu_set];
+    
     assign cpu_match[0] = valid0_read&&(tag0_read==cpu_tag);
     assign cpu_match[1] = valid1_read&&(tag1_read==cpu_tag);
     assign cpu_stall_o = cpu_valid_i&(~(|cpu_match) & !(wb_ack_i&cpu_mem_write_i)); // stall when load/store references uncached line, and exception when wb_ack_i&cpu_mem_write_i
     
-    
-    generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
-        assign cpu_rd_addr = {cpu_match[1], cpu_set};
-    end else begin : __if_spatial
-        assign cpu_rd_addr = {cpu_match[1], cpu_set, cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
-    end endgenerate
-
     assign ram_rd_addr = cache_state==CACHE_EVICT ? evict_addr : cpu_rd_addr;
     assign ram_data = cache_ram[ram_rd_addr];
     load_format lf0 (ram_data, cpu_addr_i[1:0], cpu_mem_ctrl_i, cpu_data_o);
@@ -118,12 +114,23 @@ module two_way_set_assoc_cache_wb #(
 
     assign replacement_is_dirty = replacement_enc ? valid1_read&dirty1_read : valid0_read&dirty0_read;
     assign replacement_tag = replacement_enc ? tag1_read : tag0_read;
-    assign replacement_enc = valid1_read&valid0_read ? ~mru[cpu_set] : valid1_read ? 1'b0 : 1'b1;
+    assign replacement_enc = valid1_read&valid0_read ? ~mru_read : valid1_read ? 1'b0 : 1'b1;
+
+    generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
+        assign cpu_rd_addr = {cpu_stall_o&!cpu_mem_write_i&replacement_is_dirty ? ~mru_read : cpu_match[1], cpu_set};
+    end else begin : __if_spatial
+        assign cpu_rd_addr = {cpu_stall_o&!cpu_mem_write_i&replacement_is_dirty ? ~mru_read : cpu_match[1], 
+        cpu_set,
+        cpu_stall_o&!cpu_mem_write_i&replacement_is_dirty ? {CACHE_LINE_SIZE_MULT_POW2{1'b0}} : cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
+    end endgenerate
 
     generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : ___if_no_spatial
         assign fill_end_condition = 1'b1;
-        assign fill_addr = cpu_set;
+        assign fill_addr = {replacement_enc, cpu_set};
         assign fill_pend_condition = 1'b1;
+        assign evict_pend_condition = 1'b1;
+        assign evict_end_condition = 1'b1;
+        assign evict_addr = {replacement_enc, cpu_set};
     end else begin : ___if_spatial
         reg [CACHE_LINE_SIZE_MULT_POW2-1:0] counter = '0;
         reg [CACHE_LINE_SIZE_MULT_POW2-1:0] evict_ack_counter = 0;
@@ -142,11 +149,11 @@ module two_way_set_assoc_cache_wb #(
         end
 
         assign fill_end_condition = counter == {CACHE_LINE_SIZE_MULT_POW2{1'b1}};
-        assign fill_addr = {cpu_match[1], cpu_set, counter};
+        assign fill_addr = {replacement_enc, cpu_set, counter};
         assign fill_pend_condition = wb_adr_o[CACHE_LINE_SIZE_MULT_POW2-1:0]=={CACHE_LINE_SIZE_MULT_POW2{1'b1}};
         assign evict_pend_condition = wb_adr_o[CACHE_LINE_SIZE_MULT_POW2-1:0]=={CACHE_LINE_SIZE_MULT_POW2{1'b1}};
         assign evict_end_condition = evict_ack_counter == {CACHE_LINE_SIZE_MULT_POW2{1'b1}};
-        assign evict_addr = {cpu_match[1], cpu_set, evict_rq_counter};
+        assign evict_addr = {replacement_enc, cpu_set, evict_rq_counter};
     end endgenerate
 
     always_ff @(posedge cpu_clock_i) begin

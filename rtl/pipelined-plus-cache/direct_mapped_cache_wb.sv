@@ -1,6 +1,6 @@
 module direct_mapped_cache_wb #(
     parameter SETS = 32,
-    parameter CACHE_LINE_SIZE_MULT_POW2 = 1,
+    parameter CACHE_LINE_SIZE_MULT_POW2 = 0,
     parameter AW = 12,
     localparam SL = 4,
     localparam RAM_SZ = (SETS*(2**CACHE_LINE_SIZE_MULT_POW2)),
@@ -90,7 +90,8 @@ module direct_mapped_cache_wb #(
     generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
         assign cpu_rd_addr = cpu_set;
     end else begin : __if_spatial
-        assign cpu_rd_addr = {cpu_set, cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
+        assign cpu_rd_addr = {cpu_set, 
+        cpu_stall_o&!cpu_mem_write_i&dirty_read ? {CACHE_LINE_SIZE_MULT_POW2{1'b0}} : cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
     end endgenerate
 
     assign ram_rd_addr = cache_state==CACHE_EVICT ? evict_addr : cpu_rd_addr;
@@ -103,6 +104,9 @@ module direct_mapped_cache_wb #(
         assign fill_end_condition = 1'b1;
         assign fill_addr = cpu_set;
         assign fill_pend_condition = 1'b1;
+        assign evict_pend_condition = 1'b1;
+        assign evict_end_condition = 1'b1;
+        assign evict_addr = cpu_set;
     end else begin : ___if_spatial
         reg [CACHE_LINE_SIZE_MULT_POW2-1:0] counter = '0;
         reg [CACHE_LINE_SIZE_MULT_POW2-1:0] evict_ack_counter = 0;
