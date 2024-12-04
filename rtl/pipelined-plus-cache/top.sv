@@ -66,7 +66,7 @@ module top #(
     .rst(rst),
     .RS1(RD1),
     .PCaddsrc(PC_RD1_control),
-    .PCsrc(PCsrc),
+    .PCsrc(PCsrc_e),
     .ImmOp(ImmOp),
     .PC(PC_f),
     .inc_PC(PCPlus4_f)
@@ -98,14 +98,14 @@ module top #(
   control_unit control_unit (
     .EQ(EQ),
     .instr(instr_d),
-    .RegWrite(RegWrite),
-    .ALUctrl(ALUctrl),
+    .RegWrite(RegWrite_d),
+    .ALUctrl(ALUControl_d),
     .ALUsrc(ALUsrc),
     .ImmSrc(ImmSrc),
     .PCsrc(PCsrc),
-    .destsrc(destsrc),
+    .destsrc(ResultSrc_d),
     .memCtrl(memCtrl),
-    .MemWrite(MemWrite),
+    .MemWrite(MemWrite_d),
     .UI_control(UI_control),
     .RD1_control(RD1_control),
     .PC_RD1_control(PC_RD1_control),
@@ -118,7 +118,7 @@ module top #(
     .clk(clk),
     .AD1(rs1),
     .AD2(rs2),
-    .AD3(rd),
+    .AD3(rd_w),
     .WE3(RegWrite),
     .WD3(regfile_dest_data),
     .RD1(RD1),
@@ -126,27 +126,25 @@ module top #(
     .a0(a0)
   );
 
-  // double check this in right place
-  mux ImmMux(
-      .in0(32'd4),
-      .in1(ImmOp),
-      .sel(four_imm_control),
-      .out(Imm)
-  );
-  
-  // double check this in right place
-  mux UIMux(
-      .in0(32'b0),  
-      .in1(PC),
-      .sel(UI_control),
-      .out(UI_out)
-  );
-
   sign_extend sign_extend (
     .instruction(instr_d),
     .immsrc(ImmSrc),
-    .immop(ImmOp)
+    .immop(ImmExt_d)
   );
+
+  mux ImmMux(
+    .in0(32'd4),
+    .in1(ImmExt_d),
+    .sel(four_imm_control),
+    .out(ImmExt_d)
+);
+
+mux UIMux(
+    .in0(32'b0),  
+    .in1(PC_d),
+    .sel(UI_control),
+    .out(UI_out_d)
+);
 
 
   // ------ Pipelining decode to execute stage ------
@@ -169,6 +167,7 @@ module top #(
     .Branch_d(Branch_d),
     .ALUControl_d(ALUControl_d),
     .ALUSrc_d(ALUSrc_d),
+    .UI_OUT_d(UI_OUT_d),
 
     .PC_e(PC_e),
     .PCPlus4_e(PCPlus4_e),
@@ -182,34 +181,38 @@ module top #(
     .Jump_e(Jump_e),
     .Branch_e(Branch_e),
     .ALUControl_e(ALUControl_e),
-    .ALUSrc_e(ALUSrc_e)
+    .ALUSrc_e(ALUSrc_e),
+    .UI_OUT_e(UI_OUT_e)
   );
 
 
   // ------ Execute stage ------
 
   mux Op1Mux(
-      .in0(UI_out),  
+      .in0(UI_out_e),  
       .in1(RD1_e),
       .sel(RD1_control),
       .out(ALUop1)
   );
 
   mux Op2Mux(
-      .in0(RD2),
-      .in1(Imm),
-      .sel(ALUsrc),
+      .in0(RD2_e),
+      .in1(ImmExt_e),
+      .sel(ALUsrc_e),
       .out(ALUop2)
   );
 
   ALU alu (
     .ALUop1(ALUop1),
     .ALUop2(ALUop2),
-    .ALUctrl(ALUctrl),
-    .ALUout(ALUout),
-    .EQ(EQ)
+    .ALUctrl(ALUResult_e),
+    .ALUout(ALUResult_e),
+    .EQ(Zero_e)
   );
 
+  always_comb PCSrc_e = Jump_e || (Branch_e && EQ);
+
+  
   // ------ Pipelining execute to memory stage ------
   execute_reg_file execute_reg_file (
     .clk(clk),
@@ -239,11 +242,11 @@ module top #(
 
   data_memory data_memory (
     .clk(clk),
-    .mem_write(MemWrite),
+    .mem_write(MemWrite_m),
     .mem_ctrl(memCtrl),
     .data_i(RD2),
-    .addr_i(ALUout[11:0]),
-    .data_o(ALUResult_m)
+    .addr_i(ALUResult_m[11:0]),
+    .data_o(ReadData_w)
   );
 
 
