@@ -153,14 +153,36 @@ module top #(
 
   decode_reg_file decode_reg_file (
     .clk(clk),
+    .rst_n(rst_n),
+    .en(en),
+
     .PC_d(PC_d),
+    .PCPlus4_d(PCPlus4_d),
     .RD1_d(RD1_d),
     .RD2_d(RD2_d),
-    .PCPlus4_d(PCPlus4_d),
+    .ImmExt_d(ImmExt_d),
+    .Rd_d(Rd_d),
+    .RegWrite_d(RegWrite_d),
+    .ResultSrc_d(ResultSrc_d),
+    .MemWrite_d(MemWrite_d),
+    .Jump_d(Jump_d),
+    .Branch_d(Branch_d),
+    .ALUControl_d(ALUControl_d),
+    .ALUSrc_d(ALUSrc_d),
+
     .PC_e(PC_e),
+    .PCPlus4_e(PCPlus4_e),
     .RD1_e(RD1_e),
     .RD2_e(RD2_e),
-    .PCPlus4_e(PCPlus4_e)
+    .ImmExt_e(ImmExt_e),
+    .Rd_e(Rd_e),
+    .RegWrite_e(RegWrite_e),
+    .ResultSrc_e(ResultSrc_e),
+    .MemWrite_e(MemWrite_e),
+    .Jump_e(Jump_e),
+    .Branch_e(Branch_e),
+    .ALUControl_e(ALUControl_e),
+    .ALUSrc_e(ALUSrc_e)
   );
 
 
@@ -189,7 +211,27 @@ module top #(
   );
 
   // ------ Pipelining execute to memory stage ------
+  execute_reg_file execute_reg_file (
+    .clk(clk),
+    .rst_n(rst_n),
+    .en(en),
+    
+    .PCPlus4_e(PCPlus4_e),
+    .ALUResult_e(ALUResult_e),
+    .WriteData_e(WriteData_e),
+    .Rd_e(Rd_e),
+    .RegWrite_e(RegWrite_e),
+    .ResultSrc_e(ResultSrc_e),
+    .MemWrite_e(MemWrite_e),
 
+    .PCPlus4_m(PCPlus4_m),
+    .ALUResult_m(ALUResult_m),
+    .WriteData_m(WriteData_m),
+    .Rd_m(Rd_m),
+    .RegWrite_m(RegWrite_m),
+    .ResultSrc_m(ResultSrc_m),
+    .MemWrite_m(MemWrite_m)
+  );
 
   // ------ Memory stage ------
 
