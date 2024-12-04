@@ -64,10 +64,10 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
-    .RS1(RD1),
+    .RS1(RD1), // todo
     .PCaddsrc(PC_RD1_control),
     .PCsrc(PCsrc_e),
-    .ImmOp(ImmOp),
+    .ImmOp(ImmOp), // todo
     .PC(PC_f),
     .inc_PC(PCPlus4_f)
   );
@@ -100,27 +100,27 @@ module top #(
     .instr(instr_d),
     .RegWrite(RegWrite_d),
     .ALUctrl(ALUControl_d),
-    .ALUsrc(ALUsrc),
+    .ALUsrc(ALUSrc_d),
     .ImmSrc(ImmSrc),
-    .PCsrc(PCsrc),
+    .PCsrc(PCsrc), // todo (either Jump_d or Branch_d)
     .destsrc(ResultSrc_d),
-    .memCtrl(memCtrl),
+    .memCtrl(memCtrl), // todo
     .MemWrite(MemWrite_d),
     .UI_control(UI_control),
-    .RD1_control(RD1_control),
-    .PC_RD1_control(PC_RD1_control),
+    .RD1_control(RD1_control), // todo
+    .PC_RD1_control(PC_RD1_control), // todo
     .four_imm_control(four_imm_control)
   );
 
-  wire [31:0] regfile_dest_data;
+  wire [31:0] Result_w;
 
   register_file reg_file (
     .clk(clk),
     .AD1(rs1),
     .AD2(rs2),
-    .AD3(rd_w),
+    .AD3(Rd_w),
     .WE3(RegWrite),
-    .WD3(regfile_dest_data),
+    .WD3(Result_w),
     .RD1(RD1),
     .RD2(RD2),
     .a0(a0)
@@ -191,7 +191,7 @@ mux UIMux(
   mux Op1Mux(
       .in0(UI_out_e),  
       .in1(RD1_e),
-      .sel(RD1_control),
+      .sel(RD1_control), // todo
       .out(ALUop1)
   );
 
@@ -212,8 +212,9 @@ mux UIMux(
 
   always_comb PCSrc_e = Jump_e || (Branch_e && EQ);
 
-  
+
   // ------ Pipelining execute to memory stage ------
+
   execute_reg_file execute_reg_file (
     .clk(clk),
     .rst_n(rst_n),
@@ -236,6 +237,7 @@ mux UIMux(
     .MemWrite_m(MemWrite_m)
   );
 
+
   // ------ Memory stage ------
 
   wire [31:0] ALUResult_m;
@@ -243,8 +245,8 @@ mux UIMux(
   data_memory data_memory (
     .clk(clk),
     .mem_write(MemWrite_m),
-    .mem_ctrl(memCtrl),
-    .data_i(RD2),
+    .mem_ctrl(memCtrl), // todo
+    .data_i(RD2), // todo
     .addr_i(ALUResult_m[11:0]),
     .data_o(ReadData_w)
   );
@@ -265,23 +267,27 @@ mux UIMux(
     .RegWrite_w(RegWrite_w),
     .RegWrite_m(RegWrite_m),
     .ResultSrc_w(ResultSrc_w),
-    .ResultSrc_m(ResultSrc_m)
+    .ResultSrc_m(ResultSrc_m),
+    .Rd_m(Rd_m),
+    .Rd_w(Rd_w)
   );
 
+
   // ------ Write stage ------
+
   mux3 mux3 (
     .in0(ALUResult_w),
     .in1(ReadData_w),
     .in2(PCPlus4_w),
     .sel(ResultSrc_w),
-    .out(regfile_dest_data)
+    .out(Result_w)
 );
 
 
   // assigning signals that don't have an input.
-  assign rs1 = instr[19:15];
-  assign rs2 = instr[24:20];
-  assign rd = instr[11:7];
+  assign rs1 = instr_d[19:15];
+  assign rs2 = instr_d[24:20];
+  assign Rd_d = instr_d[11:7];
   assign read_addr = PC[11:0];
   assign memCtrl = instr[14:12];
 
