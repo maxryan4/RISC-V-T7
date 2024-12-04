@@ -10,8 +10,15 @@ module top #(
   // every PCat is carried from one module to another
   // labels are (mostly) the exact same as the diagram on github.
    /* verilator lint_off UNUSED */ 
-  logic [DATA_WIDTH-1:0] PC;
-  logic [DATA_WIDTH-1:0] instr;
+  logic [DATA_WIDTH-1:0] PC_f;
+  logic [DATA_WIDTH-1:0] PC_d;
+  logic [DATA_WIDTH-1:0] instr_f;
+  logic [DATA_WIDTH-1:0] instr_d;
+  logic [DATA_WIDTH-1:0] PCPlus4_f;
+  logic [DATA_WIDTH-1:0] PCPlus4_d;
+  logic [DATA_WIDTH-1:0] PCPlus4_e;
+  logic [DATA_WIDTH-1:0] PCPlus4_m;
+  logic [DATA_WIDTH-1:0] PCPlus4_w;
   logic [DATA_WIDTH-1:0] ImmOp;
   logic EQ;
   logic [2:0] ImmSrc;
@@ -37,9 +44,23 @@ module top #(
   logic [DATA_WIDTH-1:0] Imm;
   logic [DATA_WIDTH-1:0] UI_out;
   logic [11:0] read_addr;
+  logic [1:0] ResultSrc_m;
+  logic [1:0] ResultSrc_w;
+  logic en;
+  logic rst_n;
   /* verilator lint_on UNUSED */ 
 
+
+  // remove when implement hazard unit
+  initial begin
+    en = 1'b1;
+    rst_n = 1'b1;
+  end
+
   //instantiating a module for each part of the CPU
+
+  // ------ Fetch stage ------
+
   pc_top pc (
     .clk(clk),
     .rst(rst),
@@ -47,17 +68,36 @@ module top #(
     .PCaddsrc(PC_RD1_control),
     .PCsrc(PCsrc),
     .ImmOp(ImmOp),
-    .PC(PC)
+    .PC(PC_f),
+    .inc_PC(PCPlus4_f)
   );
 
   instruction_memory instruction_memory (
     .read_addr(read_addr[11:2]),
-    .read_data(instr)
+    .read_data(instr_f)
   );
+
+
+  // ------ Pipelining fetch to decode stage ------
+
+  fetch_reg_file fetch_reg_file (
+    .clk(clk),
+    .en(en),
+    .rst_n(rst_n),
+    .read_data_f(instr_f),
+    .read_data_d(instr_d),
+    .PC_f(PC_f),
+    .PC_d(PC_d),
+    .PCPlus4_f(PCPlus4_f),
+    .PCPlus4_d(PCPlus4_d)
+  );
+
+
+  // ------ Decode stage ------
 
   control_unit control_unit (
     .EQ(EQ),
-    .instr(instr),
+    .instr(instr_d),
     .RegWrite(RegWrite),
     .ALUctrl(ALUctrl),
     .ALUsrc(ALUsrc),
@@ -71,7 +111,9 @@ module top #(
     .PC_RD1_control(PC_RD1_control),
     .four_imm_control(four_imm_control)
   );
+
   wire [31:0] regfile_dest_data;
+
   register_file reg_file (
     .clk(clk),
     .AD1(rs1),
@@ -84,6 +126,7 @@ module top #(
     .a0(a0)
   );
 
+  // double check this in right place
   mux ImmMux(
       .in0(32'd4),
       .in1(ImmOp),
@@ -91,6 +134,7 @@ module top #(
       .out(Imm)
   );
   
+  // double check this in right place
   mux UIMux(
       .in0(32'b0),  
       .in1(PC),
@@ -98,9 +142,33 @@ module top #(
       .out(UI_out)
   );
 
+  sign_extend sign_extend (
+    .instruction(instr_d),
+    .immsrc(ImmSrc),
+    .immop(ImmOp)
+  );
+
+
+  // ------ Pipelining decode to execute stage ------
+
+  decode_reg_file decode_reg_file (
+    .clk(clk),
+    .PC_d(PC_d),
+    .RD1_d(RD1_d),
+    .RD2_d(RD2_d),
+    .PCPlus4_d(PCPlus4_d),
+    .PC_e(PC_e),
+    .RD1_e(RD1_e),
+    .RD2_e(RD2_e),
+    .PCPlus4_e(PCPlus4_e)
+  );
+
+
+  // ------ Execute stage ------
+
   mux Op1Mux(
       .in0(UI_out),  
-      .in1(RD1),
+      .in1(RD1_e),
       .sel(RD1_control),
       .out(ALUop1)
   );
@@ -120,14 +188,12 @@ module top #(
     .EQ(EQ)
   );
 
-  
+  // ------ Pipelining execute to memory stage ------
 
-  sign_extend sign_extend (
-    .instruction(instr),
-    .immsrc(ImmSrc),
-    .immop(ImmOp)
-  );
-  wire [31:0] data_out;
+
+  // ------ Memory stage ------
+
+  wire [31:0] ALUResult_m;
 
   data_memory data_memory (
     .clk(clk),
@@ -135,14 +201,34 @@ module top #(
     .mem_ctrl(memCtrl),
     .data_i(RD2),
     .addr_i(ALUout[11:0]),
-    .data_o(data_out)
+    .data_o(ALUResult_m)
   );
 
 
-  mux mux2 (
-    .in0(ALUout),
-    .in1(data_out),
-    .sel(destsrc),
+  // ------ Pipelining memory to write stage ------
+
+  mem_reg_file mem_reg_file (
+    .clk(clk),
+    .en(en),
+    .rst_n(rst_n),
+    .PCPlus4_m(PCPlus4_m),
+    .ALUResult_m(ALUResult_m),
+    .ReadData_m(ReadData_m),
+    .PCPlus4_w(PCPlus4_w),
+    .ALUResult_w(ALUResult_w),
+    .ReadData_w(ReadData_w),
+    .RegWrite_w(RegWrite_w),
+    .RegWrite_m(RegWrite_m),
+    .ResultSrc_w(ResultSrc_w),
+    .ResultSrc_m(ResultSrc_m)
+  );
+
+  // ------ Write stage ------
+  mux3 mux3 (
+    .in0(ALUResult_w),
+    .in1(ReadData_w),
+    .in2(PCPlus4_w),
+    .sel(ResultSrc_w),
     .out(regfile_dest_data)
 );
 
@@ -156,4 +242,3 @@ module top #(
 
 
 endmodule
-
