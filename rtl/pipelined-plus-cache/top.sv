@@ -153,6 +153,19 @@ module top #(
     .immop(ImmOp)
   );
 
+  static_branch_predictor branch_predictor(
+    .Branch_d(Branch_d),
+    .PC_d(PC_d),
+    .ImmExt_d(ImmExt_d),
+    .Branch_e(Branch_e),                       
+    .EQ(EQ),
+    .PC_e(PC_e),
+    .ImmExt_e(ImmExt_e),
+    .PCPlus4_e,(PCPlus4_e)
+    .predict_taken(predict_taken),
+    .correct_PC(correct_PC)
+  );
+
 
   // ------ Pipelining decode to execute stage ------
 
