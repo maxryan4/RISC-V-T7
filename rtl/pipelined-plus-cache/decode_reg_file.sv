@@ -16,7 +16,6 @@ module decode_reg_file #(
     input logic [DATA_WIDTH-1:0]        RD2_d,
     input logic [DATA_WIDTH-1:0]        ImmExt_d,
     input logic [READ_DATA_WIDTH-1:0]   Rd_d,
-    input logic [DATA_WIDTH-1:0]        UI_OUT_d,
 
     input logic                         RegWrite_d,
     input logic [SRC_WIDTH - 1:0]       ResultSrc_d,
@@ -35,7 +34,6 @@ module decode_reg_file #(
     output logic [DATA_WIDTH-1:0]       RD2_e,
     output logic [DATA_WIDTH-1:0]       ImmExt_e,
     output logic [READ_DATA_WIDTH-1:0]  Rd_e,
-    output logic [DATA_WIDTH-1:0]       UI_OUT_e,
 
     output logic                        RegWrite_e,
     output logic [SRC_WIDTH - 1:0]      ResultSrc_e,
@@ -62,7 +60,6 @@ always_ff @(posedge clk) begin
             Branch_e <= Branch_d;
             ALUControl_e <= ALUControl_d;
             ALUSrc_e <= ALUSrc_d;
-            UI_OUT_e <= UI_OUT_d;
         end
     end
     else begin
@@ -79,7 +76,6 @@ always_ff @(posedge clk) begin
         Branch_e <= 1'b0;
         ALUControl_e <= 4'b0;
         ALUSrc_e <= 1'b0;
-        UI_OUT_e <= 32'b0;
     end
 end
 
