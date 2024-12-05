@@ -55,6 +55,10 @@ module top #(
   initial begin
     en = 1'b1;
     rst_n = 1'b1;
+    valid_f = 1'b1;
+    valid_d = 1'b1;
+    valid_e = 1'b1;
+    valid_m = 1'b1;
   end
 
   //instantiating a module for each part of the CPU
@@ -84,6 +88,7 @@ module top #(
     .clk(clk),
     .en(en),
     .rst_n(rst_n),
+    .valid_f(valid_f),
     .read_data_f(instr_f),
     .read_data_d(instr_d),
     .PC_f(PC_f),
@@ -154,6 +159,7 @@ mux UIMux(
     .clk(clk),
     .rst_n(rst_n),
     .en(en),
+    .valid_d(valid_d),
 
     .PC_d(PC_d),
     .PCPlus4_d(PCPlus4_d),
@@ -231,6 +237,7 @@ mux UIMux(
     .clk(clk),
     .rst_n(rst_n),
     .en(en),
+    .valid_e(valid_e),
     
     .PCPlus4_e(PCPlus4_e),
     .ALUResult_e(ALUResult_e),
@@ -272,6 +279,8 @@ mux UIMux(
     .clk(clk),
     .en(en),
     .rst_n(rst_n),
+    .valid_m(valid_m),
+
     .PCPlus4_m(PCPlus4_m),
     .ALUResult_m(ALUResult_m),
     .ReadData_m(ReadData_m),

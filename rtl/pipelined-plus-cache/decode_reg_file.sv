@@ -10,6 +10,7 @@ module decode_reg_file #(
     input logic                         clk,
     input logic                         rst_n, // flush active low
     input logic                         en, // stall (if set low will stall)
+    input logic                         valid_d, // valid for decode
 
     input logic [DATA_WIDTH-1:0]        PC_d,
     input logic [DATA_WIDTH-1:0]        PCPlus4_d,
@@ -54,7 +55,7 @@ module decode_reg_file #(
 
 always_ff @(posedge clk) begin
     if (rst_n) begin
-        if (en) begin
+        if (en && valid_d) begin
             PC_e <= PC_d;
             PCPlus4_e <= PCPlus4_d;
             RD1_e <= RD1_d;

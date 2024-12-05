@@ -4,6 +4,7 @@ module fetch_reg_file #(
     input logic                         clk,
     input logic                         rst_n, // flush active low
     input logic                         en, // stall (if set low will stall)
+    input logic                         valid_f, // valid for fetch
 
     input logic [DATA_WIDTH-1:0]        read_data_f,
     input logic [DATA_WIDTH-1:0]        PC_f,
@@ -16,7 +17,7 @@ module fetch_reg_file #(
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
-        if (en) begin
+        if (en && valid_f) begin
             read_data_d <= read_data_f;
             PC_d <= PC_f;
             PCPlus4_d <= PCPlus4_f;
