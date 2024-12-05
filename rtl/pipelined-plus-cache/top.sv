@@ -48,6 +48,11 @@ module top #(
   logic [1:0] ResultSrc_w;
   logic en;
   logic rst_n;
+
+  // additional branch predictor logic:
+  logic predict_taken;
+  logic [DATA_WIDTH-1:0] correct_PC;
+
   /* verilator lint_on UNUSED */ 
 
 
