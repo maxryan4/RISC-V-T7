@@ -166,7 +166,9 @@ module top #(
     .correct_PC(correct_PC)
   );
 
-
+  always_comb PCSrc = predict_taken; // speculatively update PCSrc in decode stage
+                                     // PCSrc_e still calculated in execute stage to handle incorrect prediction
+ 
   // ------ Pipelining decode to execute stage ------
 
   decode_reg_file decode_reg_file (
@@ -205,6 +207,8 @@ module top #(
     .ALUout(ALUout),
     .EQ(EQ)
   );
+
+  always_comb PCSrc_e = Jump_e || (Branch_e && EQ);
 
   // ------ Pipelining execute to memory stage ------
 
