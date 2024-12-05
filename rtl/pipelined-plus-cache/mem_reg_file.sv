@@ -15,6 +15,8 @@ module mem_reg_file #(parameter
     input logic [1:0]                   ResultSrc_m,
     input logic [READ_DATA_WIDTH-1:0]   Rd_m,
 
+    output logic                         valid_w,
+
     output logic [DATA_WIDTH-1:0]       PCPlus4_w,
     output logic [DATA_WIDTH-1:0]       ALUResult_w,
     output logic [DATA_WIDTH-1:0]       ReadData_w,
@@ -26,6 +28,7 @@ module mem_reg_file #(parameter
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
         if(en && valid_m) begin
+            valid_w <= valid_m;
             PCPlus4_w <= PCPlus4_m;
             ALUResult_w <= ALUResult_m;
             ReadData_w <= ReadData_m;

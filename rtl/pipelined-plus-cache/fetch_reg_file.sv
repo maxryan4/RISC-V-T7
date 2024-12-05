@@ -10,6 +10,8 @@ module fetch_reg_file #(
     input logic [DATA_WIDTH-1:0]        PC_f,
     input logic [DATA_WIDTH-1:0]        PCPlus4_f,
 
+    output logic                       valid_d,
+
     output logic [DATA_WIDTH-1:0]       read_data_d,
     output logic [DATA_WIDTH-1:0]       PC_d,
     output logic [DATA_WIDTH-1:0]       PCPlus4_d
@@ -18,6 +20,7 @@ module fetch_reg_file #(
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
         if (en && valid_f) begin
+            valid_d <= valid_f;
             read_data_d <= read_data_f;
             PC_d <= PC_f;
             PCPlus4_d <= PCPlus4_f;
