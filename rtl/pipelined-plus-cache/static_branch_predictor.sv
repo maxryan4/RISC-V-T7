@@ -5,15 +5,15 @@ module static_branch_predictor #(
     input logic [DATA_WIDTH-1:0] RD,
     input logic [DATA_WIDTH-1:0] PC_f,  
     output logic [DATA_WIDTH-1:0] branch_target,                 
-    output logic predict_taken                      // branch prediction (1 = predict branch taken)
+    output logic predict_taken              // branch prediction (1 = predict branch taken)
 
 );
 
-    logic [DATA_WIDTH-1:0] branch_target;           // target address of branch
+    logic [DATA_WIDTH-1:0] branch_target;   // target address of branch
 
     always_comb begin
         case (instr[6:0])
-            // Branche Instructions
+            // Branch Instructions
             7'b1100011: branch_target = PC_f + {{20{RD[31]}},RD[7],RD[30:25],RD[11:8],1'b0};
             
             // JAL
@@ -24,9 +24,11 @@ module static_branch_predictor #(
         endcase
         
         if (RD[6:0] == 7'b1100011) begin            // if branch instruction
-            predict_taken = (branch_target < PC_f) ? 1'b1 : 1'b0;
+            predict_taken = (branch_target < PC_f) ? 1'b1 : 1'b0;   // only take jump if backwards branch
+        end else if (RD[6:0] == 7'b1101111) begin   // JAL instruction
+            predict_taken = 1'b1;       // always take jump (unconditional)
         end else begin
-            predict_taken = 1'b0;
+            predict_taken = 1'b0;       // never take jump if JALR (or any other instruction)
         end
     end
 
