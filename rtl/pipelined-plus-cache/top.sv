@@ -48,6 +48,11 @@ module top #(
   logic [1:0] ResultSrc_w;
   logic en;
   logic rst_n;
+
+  // additional branch predictor logic:
+  logic predict_taken;
+  logic [DATA_WIDTH-1:0] correct_PC;
+
   /* verilator lint_on UNUSED */ 
 
 
@@ -64,10 +69,10 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
-    .RS1(RD1),
+    .RS1(RD1), // todo
     .PCaddsrc(PC_RD1_control),
-    .PCsrc(PCsrc),
-    .ImmOp(ImmOp),
+    .PCsrc(PCsrc_e),
+    .ImmOp(ImmOp), // todo
     .PC(PC_f),
     .inc_PC(PCPlus4_f)
   );
@@ -98,97 +103,161 @@ module top #(
   control_unit control_unit (
     .EQ(EQ),
     .instr(instr_d),
-    .RegWrite(RegWrite),
-    .ALUctrl(ALUctrl),
-    .ALUsrc(ALUsrc),
+    .RegWrite(RegWrite_d),
+    .ALUctrl(ALUControl_d),
+    .ALUsrc(ALUSrc_d),
     .ImmSrc(ImmSrc),
-    .PCsrc(PCsrc),
-    .destsrc(destsrc),
-    .memCtrl(memCtrl),
-    .MemWrite(MemWrite),
+    .PCsrc(PCsrc), // todo (either Jump_d or Branch_d)
+    .destsrc(ResultSrc_d),
+    .memCtrl(memCtrl), // todo
+    .MemWrite(MemWrite_d),
     .UI_control(UI_control),
-    .RD1_control(RD1_control),
-    .PC_RD1_control(PC_RD1_control),
+    .RD1_control(RD1_control), // todo
+    .PC_RD1_control(PC_RD1_control), // todo
     .four_imm_control(four_imm_control)
   );
 
-  wire [31:0] regfile_dest_data;
+  wire [31:0] Result_w;
 
   register_file reg_file (
     .clk(clk),
     .AD1(rs1),
     .AD2(rs2),
-    .AD3(rd),
+    .AD3(Rd_w),
     .WE3(RegWrite),
-    .WD3(regfile_dest_data),
+    .WD3(Result_w),
     .RD1(RD1),
     .RD2(RD2),
     .a0(a0)
   );
 
-  // double check this in right place
-  mux ImmMux(
-      .in0(32'd4),
-      .in1(ImmOp),
-      .sel(four_imm_control),
-      .out(Imm)
-  );
-  
-  // double check this in right place
-  mux UIMux(
-      .in0(32'b0),  
-      .in1(PC),
-      .sel(UI_control),
-      .out(UI_out)
-  );
-
   sign_extend sign_extend (
     .instruction(instr_d),
     .immsrc(ImmSrc),
-    .immop(ImmOp)
+    .immop(ImmExt_d)
   );
 
+  mux ImmMux(
+    .in0(32'd4),
+    .in1(ImmExt_d),
+    .sel(four_imm_control),
+    .out(ImmExt_d)
+);
 
+mux UIMux(
+    .in0(32'b0),  
+    .in1(PC_d),
+    .sel(UI_control),
+    .out(UI_out_d)
+);
+
+static_branch_predictor branch_predictor(
+      .Branch_d(Branch_d),
+      .PC_d(PC_d),
+      .ImmExt_d(ImmExt_d),
+      .Branch_e(Branch_e),                       
+      .EQ(EQ),
+      .PC_e(PC_e),
+      .ImmExt_e(ImmExt_e),
+      .PCPlus4_e,(PCPlus4_e)
+      .predict_taken(predict_taken),
+      .correct_PC(correct_PC)
+);
+  /// haven't implemented correct_PC with flushing in pc_top or here in top??
+
+  // bit confused where PCSrc comes from it's not on the schematic???
+  always_comb PCSrc = predict_taken; // speculatively update PCSrc in decode stage
+                                     // PCSrc_e still calculated in execute stage to handle incorrect prediction
+ 
   // ------ Pipelining decode to execute stage ------
 
   decode_reg_file decode_reg_file (
     .clk(clk),
+    .rst_n(rst_n),
+    .en(en),
+
     .PC_d(PC_d),
+    .PCPlus4_d(PCPlus4_d),
     .RD1_d(RD1_d),
     .RD2_d(RD2_d),
-    .PCPlus4_d(PCPlus4_d),
+    .ImmExt_d(ImmExt_d),
+    .Rd_d(Rd_d),
+    .RegWrite_d(RegWrite_d),
+    .ResultSrc_d(ResultSrc_d),
+    .MemWrite_d(MemWrite_d),
+    .Jump_d(Jump_d),
+    .Branch_d(Branch_d),
+    .ALUControl_d(ALUControl_d),
+    .ALUSrc_d(ALUSrc_d),
+    .UI_OUT_d(UI_OUT_d),
+
     .PC_e(PC_e),
+    .PCPlus4_e(PCPlus4_e),
     .RD1_e(RD1_e),
     .RD2_e(RD2_e),
-    .PCPlus4_e(PCPlus4_e)
+    .ImmExt_e(ImmExt_e),
+    .Rd_e(Rd_e),
+    .RegWrite_e(RegWrite_e),
+    .ResultSrc_e(ResultSrc_e),
+    .MemWrite_e(MemWrite_e),
+    .Jump_e(Jump_e),
+    .Branch_e(Branch_e),
+    .ALUControl_e(ALUControl_e),
+    .ALUSrc_e(ALUSrc_e),
+    .UI_OUT_e(UI_OUT_e)
   );
 
 
   // ------ Execute stage ------
 
   mux Op1Mux(
-      .in0(UI_out),  
+      .in0(UI_out_e),  
       .in1(RD1_e),
-      .sel(RD1_control),
+      .sel(RD1_control), // todo
       .out(ALUop1)
   );
 
   mux Op2Mux(
-      .in0(RD2),
-      .in1(Imm),
-      .sel(ALUsrc),
+      .in0(RD2_e),
+      .in1(ImmExt_e),
+      .sel(ALUsrc_e),
       .out(ALUop2)
   );
 
   ALU alu (
     .ALUop1(ALUop1),
     .ALUop2(ALUop2),
-    .ALUctrl(ALUctrl),
-    .ALUout(ALUout),
-    .EQ(EQ)
+    .ALUctrl(ALUResult_e),
+    .ALUout(ALUResult_e),
+    .EQ(Zero_e)
   );
 
+  always_comb PCSrc_e = Jump_e || (Branch_e && EQ);
+
+
   // ------ Pipelining execute to memory stage ------
+
+  execute_reg_file execute_reg_file (
+    .clk(clk),
+    .rst_n(rst_n),
+    .en(en),
+    
+    .PCPlus4_e(PCPlus4_e),
+    .ALUResult_e(ALUResult_e),
+    .WriteData_e(WriteData_e),
+    .Rd_e(Rd_e),
+    .RegWrite_e(RegWrite_e),
+    .ResultSrc_e(ResultSrc_e),
+    .MemWrite_e(MemWrite_e),
+
+    .PCPlus4_m(PCPlus4_m),
+    .ALUResult_m(ALUResult_m),
+    .WriteData_m(WriteData_m),
+    .Rd_m(Rd_m),
+    .RegWrite_m(RegWrite_m),
+    .ResultSrc_m(ResultSrc_m),
+    .MemWrite_m(MemWrite_m)
+  );
 
 
   // ------ Memory stage ------
@@ -197,11 +266,11 @@ module top #(
 
   data_memory data_memory (
     .clk(clk),
-    .mem_write(MemWrite),
-    .mem_ctrl(memCtrl),
-    .data_i(RD2),
-    .addr_i(ALUout[11:0]),
-    .data_o(ALUResult_m)
+    .mem_write(MemWrite_m),
+    .mem_ctrl(memCtrl), // todo
+    .data_i(RD2), // todo
+    .addr_i(ALUResult_m[11:0]),
+    .data_o(ReadData_w)
   );
 
 
@@ -220,23 +289,27 @@ module top #(
     .RegWrite_w(RegWrite_w),
     .RegWrite_m(RegWrite_m),
     .ResultSrc_w(ResultSrc_w),
-    .ResultSrc_m(ResultSrc_m)
+    .ResultSrc_m(ResultSrc_m),
+    .Rd_m(Rd_m),
+    .Rd_w(Rd_w)
   );
 
+
   // ------ Write stage ------
+
   mux3 mux3 (
     .in0(ALUResult_w),
     .in1(ReadData_w),
     .in2(PCPlus4_w),
     .sel(ResultSrc_w),
-    .out(regfile_dest_data)
+    .out(Result_w)
 );
 
 
   // assigning signals that don't have an input.
-  assign rs1 = instr[19:15];
-  assign rs2 = instr[24:20];
-  assign rd = instr[11:7];
+  assign rs1 = instr_d[19:15];
+  assign rs2 = instr_d[24:20];
+  assign Rd_d = instr_d[11:7];
   assign read_addr = PC[11:0];
   assign memCtrl = instr[14:12];
 
