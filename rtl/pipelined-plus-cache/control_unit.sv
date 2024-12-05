@@ -8,6 +8,7 @@ module control_unit (
     output logic ALUsrc,
     output logic [2:0] ImmSrc,
     output logic PCsrc,
+    output logic Branch,
     output logic destsrc,//resultscr
     output logic [2:0] memCtrl,
     output logic MemWrite,
@@ -45,6 +46,7 @@ module control_unit (
                 ALUsrc=0;
                 ImmSrc=0;
                 PCsrc=0;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -58,6 +60,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=0;
                 PCsrc=0;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -67,6 +70,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=0;
                 PCsrc=0;
+                Branch=0;
                 destsrc=1;
                 MemWrite=0;
             end
@@ -76,6 +80,7 @@ module control_unit (
                 ALUsrc=0;
                 ImmSrc=1;
                 PCsrc=EQ;
+                Branch=1;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -85,6 +90,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=2;
                 PCsrc=0;
+                Branch=0;
                 destsrc=0;
                 MemWrite=1;
             end
@@ -94,6 +100,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=3;
                 PCsrc=0;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -103,6 +110,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=3;
                 PCsrc=0;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -113,6 +121,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=4;
                 PCsrc=1;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -122,6 +131,7 @@ module control_unit (
                 ALUsrc=1;
                 ImmSrc=0;
                 PCsrc=1;
+                Branch=0;
                 destsrc=0;
                 MemWrite=0;
             end                        
@@ -130,6 +140,7 @@ module control_unit (
                 ALUctrl=0;
                 ALUsrc=0;
                 ImmSrc=0;
+                Branch=0;
                 PCsrc=0;
                 destsrc=0;
                 MemWrite=0;

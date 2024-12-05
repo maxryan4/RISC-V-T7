@@ -64,10 +64,10 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
-    .RS1(RD1), // todo
-    .PCaddsrc(PC_RD1_control),
+    .RS1(RD1_e),
+    .PCaddsrc(PC_RD1_control_e),
     .PCsrc(PCsrc_e),
-    .ImmOp(ImmOp), // todo
+    .ImmOp(ImmOp_e),
     .PC(PC_f),
     .inc_PC(PCPlus4_f)
   );
@@ -102,13 +102,14 @@ module top #(
     .ALUctrl(ALUControl_d),
     .ALUsrc(ALUSrc_d),
     .ImmSrc(ImmSrc),
-    .PCsrc(PCsrc), // todo (either Jump_d or Branch_d)
+    .PCsrc(Jump_d),
+    .Branch(Branch_d),
     .destsrc(ResultSrc_d),
-    .memCtrl(memCtrl), // todo
+    .memCtrl(memCtrl_d),
     .MemWrite(MemWrite_d),
     .UI_control(UI_control),
-    .RD1_control(RD1_control), // todo
-    .PC_RD1_control(PC_RD1_control), // todo
+    .RD1_control(RD1_control_d),
+    .PC_RD1_control(PC_RD1_control_d),
     .four_imm_control(four_imm_control)
   );
 
@@ -121,20 +122,20 @@ module top #(
     .AD3(Rd_w),
     .WE3(RegWrite),
     .WD3(Result_w),
-    .RD1(RD1),
-    .RD2(RD2),
+    .RD1(RD1_d),
+    .RD2(RD2_d),
     .a0(a0)
   );
 
   sign_extend sign_extend (
     .instruction(instr_d),
     .immsrc(ImmSrc),
-    .immop(ImmExt_d)
+    .immop(ImmOp_d)
   );
 
   mux ImmMux(
     .in0(32'd4),
-    .in1(ImmExt_d),
+    .in1(ImmOp_d),
     .sel(four_imm_control),
     .out(ImmExt_d)
 );
@@ -149,7 +150,7 @@ mux UIMux(
 
   // ------ Pipelining decode to execute stage ------
 
-  decode_reg_file decode_reg_file (
+  decode_reg_file decode_reg_file(
     .clk(clk),
     .rst_n(rst_n),
     .en(en),
@@ -160,6 +161,7 @@ mux UIMux(
     .RD2_d(RD2_d),
     .ImmExt_d(ImmExt_d),
     .Rd_d(Rd_d),
+    .ImmOp_d(ImmOp_d),
     .RegWrite_d(RegWrite_d),
     .ResultSrc_d(ResultSrc_d),
     .MemWrite_d(MemWrite_d),
@@ -168,6 +170,9 @@ mux UIMux(
     .ALUControl_d(ALUControl_d),
     .ALUSrc_d(ALUSrc_d),
     .UI_OUT_d(UI_OUT_d),
+    .MemCtrl_d(MemCtrl_d),
+    .RD1_control_d(RD1_control_d),
+    .PC_RD1_control_d(PC_RD1_control_d),
 
     .PC_e(PC_e),
     .PCPlus4_e(PCPlus4_e),
@@ -175,6 +180,7 @@ mux UIMux(
     .RD2_e(RD2_e),
     .ImmExt_e(ImmExt_e),
     .Rd_e(Rd_e),
+    .ImmOp_e(ImmOp_e),
     .RegWrite_e(RegWrite_e),
     .ResultSrc_e(ResultSrc_e),
     .MemWrite_e(MemWrite_e),
@@ -182,7 +188,10 @@ mux UIMux(
     .Branch_e(Branch_e),
     .ALUControl_e(ALUControl_e),
     .ALUSrc_e(ALUSrc_e),
-    .UI_OUT_e(UI_OUT_e)
+    .UI_OUT_e(UI_OUT_e),
+    .MemCtrl_e(MemCtrl_e),
+    .RD1_control_e(RD1_control_e),
+    .PC_RD1_control_e(PC_RD1_control_e)
   );
 
 
@@ -191,7 +200,7 @@ mux UIMux(
   mux Op1Mux(
       .in0(UI_out_e),  
       .in1(RD1_e),
-      .sel(RD1_control), // todo
+      .sel(RD1_control_e),
       .out(ALUop1)
   );
 
@@ -210,7 +219,10 @@ mux UIMux(
     .EQ(Zero_e)
   );
 
-  always_comb PCSrc_e = Jump_e || (Branch_e && EQ);
+  always_comb begin
+    PCSrc_e = Jump_e || (Branch_e && EQ);
+    WriteData_e = RD2_e;
+  end
 
 
   // ------ Pipelining execute to memory stage ------
@@ -227,6 +239,7 @@ mux UIMux(
     .RegWrite_e(RegWrite_e),
     .ResultSrc_e(ResultSrc_e),
     .MemWrite_e(MemWrite_e),
+    .MemCtrl_e(MemCtrl_e),
 
     .PCPlus4_m(PCPlus4_m),
     .ALUResult_m(ALUResult_m),
@@ -234,7 +247,8 @@ mux UIMux(
     .Rd_m(Rd_m),
     .RegWrite_m(RegWrite_m),
     .ResultSrc_m(ResultSrc_m),
-    .MemWrite_m(MemWrite_m)
+    .MemWrite_m(MemWrite_m),
+    .MemCtrl_m(MemCtrl_m)
   );
 
 
@@ -245,8 +259,8 @@ mux UIMux(
   data_memory data_memory (
     .clk(clk),
     .mem_write(MemWrite_m),
-    .mem_ctrl(memCtrl), // todo
-    .data_i(RD2), // todo
+    .mem_ctrl(MemCtrl_m),
+    .data_i(WriteData_m),
     .addr_i(ALUResult_m[11:0]),
     .data_o(ReadData_w)
   );
