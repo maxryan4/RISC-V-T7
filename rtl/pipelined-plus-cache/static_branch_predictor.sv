@@ -5,7 +5,15 @@ module static_branch_predictor #(
     input logic Branch_d,                    
     input logic [DATA_WIDTH-1:0] PC_d,
     input logic [DATA_WIDTH-1:0] ImmExt_d,      // offset for branch from decode stage
-    output logic predict_taken                  // branch prediction (1 = predict branch taken)
+    
+    input logic Branch_e,                       
+    input logic EQ,                             // EQ = 1 if branching
+    input logic [DATA_WIDTH-1:0] PC_e,          // PC from execute stage
+    input logic [DATA_WIDTH-1:0] ImmExt_e,      // offset for branch from execute stage
+    input logic [DATA_WIDTH-1:0] PCPlus4_e,     // PCPlus4 from execute stage
+
+    output logic predict_taken,                 // branch prediction (1 = predict branch taken)
+    output logic [DATA_WIDTH-1:0] correct_PC    // actual PC if prediction is wrong
 );
 
     logic [DATA_WIDTH-1:0] branch_target;       // target address of branch
@@ -22,5 +30,8 @@ module static_branch_predictor #(
             predict_taken = 1'b0;               // default for non-branch instr
         end
     end 
+
+    // ACTUAL BRANCH OUTCOME
+    assign correct_PC = (Branch_e && EQ) ? (PC_e + ImmExt_e) : PCPlus4_e;   // compute correct PC in case prediction wrong
 
 endmodule
