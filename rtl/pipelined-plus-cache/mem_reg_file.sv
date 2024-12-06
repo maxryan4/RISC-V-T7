@@ -28,7 +28,6 @@ module mem_reg_file #(parameter
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
         if(en && valid_m) begin
-            valid_w <= valid_m;
             PCPlus4_w <= PCPlus4_m;
             ALUResult_w <= ALUResult_m;
             ReadData_w <= ReadData_m;
@@ -36,6 +35,7 @@ always_ff @(posedge clk or negedge rst_n) begin
             ResultSrc_w <= ResultSrc_m;
             Rd_w <= Rd_m;
         end
+        valid_w <= valid_m;
     end
     else begin
         PCPlus4_w <= 32'b0;

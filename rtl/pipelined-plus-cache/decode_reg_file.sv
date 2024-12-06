@@ -58,7 +58,6 @@ module decode_reg_file #(
 always_ff @(posedge clk) begin
     if (rst_n) begin
         if (en && valid_d) begin
-            valid_e <= valid_d;
             PC_e <= PC_d;
             PCPlus4_e <= PCPlus4_d;
             RD1_e <= RD1_d;
@@ -78,6 +77,7 @@ always_ff @(posedge clk) begin
             RD1_control_e <= RD1_control_d;
             PC_RD1_control_e <= PC_RD1_control_d;
         end
+        valid_e <= valid_d;
     end
     else begin
         PC_e <= 32'b0;

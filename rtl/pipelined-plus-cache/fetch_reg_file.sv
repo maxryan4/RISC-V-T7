@@ -20,11 +20,11 @@ module fetch_reg_file #(
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
         if (en && valid_f) begin
-            valid_d <= valid_f;
             read_data_d <= read_data_f;
             PC_d <= PC_f;
             PCPlus4_d <= PCPlus4_f;
         end
+        valid_d <= valid_f;
     end
     else begin
         read_data_d <= 32'b0;

@@ -36,7 +36,6 @@ module execute_reg_file #(
 always_ff @(posedge clk) begin
     if (rst_n) begin
         if (en && valid_e) begin
-            valid_m <= valid_e;
             PCPlus4_m <= PCPlus4_e;
             ALUResult_m <= ALUResult_e;
             WriteData_m <= WriteData_e;
@@ -47,6 +46,7 @@ always_ff @(posedge clk) begin
             MemWrite_m <= MemWrite_e;
             MemCtrl_m <= MemCtrl_e;
         end
+        valid_m <= valid_e;
     end
     else begin
         PCPlus4_m <= 32'b0;
