@@ -9,7 +9,8 @@ module control_unit (
     output logic [2:0] ImmSrc,
     output logic PCsrc,
     output logic Branch,
-    output logic destsrc,//resultscr
+    output logic Jump,
+    output logic [1:0] destsrc,//resultscr
     output logic [2:0] memCtrl,
     output logic MemWrite,
     output logic UI_control,
@@ -47,6 +48,7 @@ module control_unit (
                 ImmSrc=0;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -61,6 +63,7 @@ module control_unit (
                 ImmSrc=0;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -71,6 +74,7 @@ module control_unit (
                 ImmSrc=0;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=1;
                 MemWrite=0;
             end
@@ -81,6 +85,7 @@ module control_unit (
                 ImmSrc=1;
                 PCsrc=EQ;
                 Branch=1;
+                Jump=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -91,6 +96,7 @@ module control_unit (
                 ImmSrc=2;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=0;
                 MemWrite=1;
             end
@@ -101,6 +107,7 @@ module control_unit (
                 ImmSrc=3;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -111,6 +118,7 @@ module control_unit (
                 ImmSrc=3;
                 PCsrc=0;
                 Branch=0;
+                Jump=0;
                 destsrc=0;
                 MemWrite=0;
             end
@@ -122,7 +130,8 @@ module control_unit (
                 ImmSrc=4;
                 PCsrc=1;
                 Branch=0;
-                destsrc=0;
+                Jump=1;
+                destsrc=3; // changed from 0 to 3 so we can write PC+4 to register
                 MemWrite=0;
             end
             7'b1100111 :begin//JALR
@@ -132,7 +141,8 @@ module control_unit (
                 ImmSrc=0;
                 PCsrc=1;
                 Branch=0;
-                destsrc=0;
+                Jump=1;
+                destsrc=3; // changed from 0 to 3 so we can write PC+4 to register
                 MemWrite=0;
             end                        
             default: begin
@@ -141,6 +151,7 @@ module control_unit (
                 ALUsrc=0;
                 ImmSrc=0;
                 Branch=0;
+                Jump=0;
                 PCsrc=0;
                 destsrc=0;
                 MemWrite=0;
