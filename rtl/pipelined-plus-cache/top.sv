@@ -110,7 +110,8 @@ module top #(
     .PCsrc(PCSrc_e),
     .ImmOp(ImmOp_e),
     .PC(PC_f),
-    .inc_PC(PCPlus4_f)
+    .inc_PC(PCPlus4_f),
+    .PC_e(PC_e)
   );
 
   instruction_memory instruction_memory (
