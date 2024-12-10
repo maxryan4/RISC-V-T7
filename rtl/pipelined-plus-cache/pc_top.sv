@@ -7,12 +7,14 @@ module pc_top #(
     input   logic [DATA_WIDTH-1:0]  ImmOp,
     input   logic [DATA_WIDTH-1:0]  RS1,
     input   logic                   PCaddsrc,
-    output  logic [DATA_WIDTH-1:0]  PC    
+    input   logic [DATA_WIDTH-1:0]  PC_e,
+    output  logic [DATA_WIDTH-1:0]  PC,
+    output  logic [DATA_WIDTH-1:0]  inc_PC
 );
 
     // internal signals
     logic [DATA_WIDTH-1:0] branch_PC;
-    logic [DATA_WIDTH-1:0] inc_PC;
+    // logic [DATA_WIDTH-1:0] inc_PC;
     logic [DATA_WIDTH-1:0] next_PC;
 
     // instantiating modules
@@ -31,7 +33,7 @@ module pc_top #(
     logic [DATA_WIDTH-1:0] PC_fin;
     mux mux3 (
       .in0(RS1),
-      .in1(PC),
+      .in1(PC_e),
       .sel(PCaddsrc),
       .out(PC_fin)
     );
