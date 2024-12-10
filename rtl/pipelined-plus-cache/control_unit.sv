@@ -48,7 +48,13 @@ module control_unit (
                 PCsrc=0;
                 destsrc=0;
                 MemWrite=0;
-                mul_sel=0;
+                
+                if (instr[25]) begin  // checks to see if last bit of func7 is 1 indicating that it is a mul instruction
+                    mul_sel=1;
+                end 
+                else begin
+                    mul_sel=0;
+                end
             end
             7'b0010011:begin//imme
                 RegWrite=1;
@@ -62,13 +68,7 @@ module control_unit (
                 PCsrc=0;
                 destsrc=0;
                 MemWrite=0;
-
-                if (instr[25]) begin  // checks to see if last bit of func7 is 1 indicating that it is a mul instruction
-                    mul_sel=1;
-                end 
-                else begin
-                    mul_sel=0;
-                end
+                mul_sel=0;
             end
             7'b0000011:begin// Loads
                 RegWrite=1;
