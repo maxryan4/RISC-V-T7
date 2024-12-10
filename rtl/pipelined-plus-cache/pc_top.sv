@@ -7,6 +7,7 @@ module pc_top #(
     input   logic [DATA_WIDTH-1:0]  ImmOp,
     input   logic [DATA_WIDTH-1:0]  RS1,
     input   logic                   PCaddsrc,
+    input   logic [DATA_WIDTH-1:0]  PC_e,
     output  logic [DATA_WIDTH-1:0]  PC,
     output  logic [DATA_WIDTH-1:0]  inc_PC
 );
@@ -32,7 +33,7 @@ module pc_top #(
     logic [DATA_WIDTH-1:0] PC_fin;
     mux mux3 (
       .in0(RS1),
-      .in1(PC),
+      .in1(PC_e),
       .sel(PCaddsrc),
       .out(PC_fin)
     );

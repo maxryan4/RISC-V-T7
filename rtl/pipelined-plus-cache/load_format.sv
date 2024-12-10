@@ -20,7 +20,7 @@ module load_format (
 
     logic invert;
     assign invert = !mem_ctrl[2] && ((mem_ctrl[1:0] == HALFWORD) && select_halfbyte[15] || ((mem_ctrl[1:0] == BYTE) && select_byte[7]));
-    assign select = mem_ctrl[1:0]==BYTE ? {24{invert},select_byte} : mem_ctrl[1:0]==HALFWORD ? {16{invert}, select_halfbyte} : read_data;
+    assign select = mem_ctrl[1:0]==BYTE ? {{24{invert}},select_byte} : mem_ctrl[1:0]==HALFWORD ? {{16{invert}}, select_halfbyte} : read_data;
 
     assign mem_data = select;
 endmodule

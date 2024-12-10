@@ -57,26 +57,28 @@ module decode_reg_file #(
 
 always_ff @(posedge clk) begin
     if (rst_n) begin
-        if (en && valid_d) begin
+        if(en) begin
+            if (valid_d) begin
+                PC_e <= PC_d;
+                PCPlus4_e <= PCPlus4_d;
+                RD1_e <= RD1_d;
+                RD2_e <= RD2_d;
+                ImmExt_e <= ImmExt_d;
+                Rd_e <= Rd_d;
+                ImmOp_e <= ImmOp_d;
+                RegWrite_e <= RegWrite_d;
+                ResultSrc_e <= ResultSrc_d;
+                MemWrite_e <= MemWrite_d;
+                Jump_e <= Jump_d;
+                Branch_e <= Branch_d;
+                ALUControl_e <= ALUControl_d;
+                ALUSrc_e <= ALUSrc_d;
+                UI_OUT_e <= UI_OUT_d;
+                MemCtrl_e <= MemCtrl_d;
+                RD1_control_e <= RD1_control_d;
+                PC_RD1_control_e <= PC_RD1_control_d;
+            end
             valid_e <= valid_d;
-            PC_e <= PC_d;
-            PCPlus4_e <= PCPlus4_d;
-            RD1_e <= RD1_d;
-            RD2_e <= RD2_d;
-            ImmExt_e <= ImmExt_d;
-            Rd_e <= Rd_d;
-            ImmOp_e <= ImmOp_d;
-            RegWrite_e <= RegWrite_d;
-            ResultSrc_e <= ResultSrc_d;
-            MemWrite_e <= MemWrite_d;
-            Jump_e <= Jump_d;
-            Branch_e <= Branch_d;
-            ALUControl_e <= ALUControl_d;
-            ALUSrc_e <= ALUSrc_d;
-            UI_OUT_e <= UI_OUT_d;
-            MemCtrl_e <= MemCtrl_d;
-            RD1_control_e <= RD1_control_d;
-            PC_RD1_control_e <= PC_RD1_control_d;
         end
     end
     else begin
