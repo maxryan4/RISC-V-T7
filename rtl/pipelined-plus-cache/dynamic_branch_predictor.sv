@@ -5,7 +5,14 @@ module dynamic_branch_predictor #(
     input logic                     clk,
     input logic                     rst,
     input logic [DATA_WIDTH-1:0]    RD,     // current instructino
-    input logic [DATA_WIDTH-1:0]    PC_f
+    input logic [DATA_WIDTH-1:0]    PC_f,
+
+    input logic                     branch_actual_taken,    // checks if branch is actually taken
+    input logic [DATA_WIDTH-1:0]    branch_actual_target,
+
+    output logic                    predict_taken,
+    output logic [DATA_WIDTH-1:0]   branch_target
+
 );
 
     // this is the branch target buffer
@@ -47,12 +54,28 @@ module dynamic_branch_predictor #(
             end
         end
 
+        // all this is to update BTB when we actually know if branch taken or not
         else begin
-            
-        
+            logic [3:0] update_index = branch_actual_target[5:2]
+                                    // if instr = cond. jump   or if instr = JAL uncond. jump
+            if (branch_actual_taken || (RD[6:0] == 7'b1100011) || (RD[6:0] == 7'b1101111)) begin
+                BTB[update_index].valid  <= 1'b1;       
+                BTB[update_index].tag    <= branch_actual_target[DATA_WIDTH-1:6];   // update tag
+                BTB[update_index].target <= branch_actual_target;                   // update target PC
+                BTB[update_index].type   <= (RD[6:0] == 7'b1101111);                // JAL uncond. jump
+            end
+
+            // this updates 2 bit predictor
+            if (branch_actual_taken) begin                  // if branch is actually taken
+                if (BTB[update_index].pred < 2'b11) begin   // and pred not already ST (11), increment by 1
+                    BTB[update_index].pred <= BTB[update_index].pred + 2'b01;
+                end
+            end else begin                                  // if branch is not actually taken
+                if (BTB[update_index].pred > 2'b00) begin   // and pred not already SN (00), decrement by 1
+                    BTB[update_index].pred <= BTB[update_index].pred - 2'b01;
+                end
+            end
         end
-
     end
-
 
 endmodule
