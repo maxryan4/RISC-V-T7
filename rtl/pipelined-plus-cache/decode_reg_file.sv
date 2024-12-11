@@ -16,7 +16,6 @@ module decode_reg_file #(
     input logic [DATA_WIDTH-1:0]        PCPlus4_d,
     input logic [DATA_WIDTH-1:0]        RD1_d,
     input logic [DATA_WIDTH-1:0]        RD2_d,
-    input logic [DATA_WIDTH-1:0]        ImmExt_d,
     input logic [READ_DATA_WIDTH-1:0]   Rd_d,
     input logic [DATA_WIDTH-1:0]        UI_OUT_d,
     input logic [DATA_WIDTH-1:0]        ImmOp_d,
@@ -40,7 +39,6 @@ module decode_reg_file #(
     output logic [DATA_WIDTH-1:0]       PCPlus4_e,
     output logic [DATA_WIDTH-1:0]       RD1_e,
     output logic [DATA_WIDTH-1:0]       RD2_e,
-    output logic [DATA_WIDTH-1:0]       ImmExt_e,
     output logic [READ_DATA_WIDTH-1:0]  Rd_e,
     output logic [READ_DATA_WIDTH-1:0]  RS1_e,
     output logic [READ_DATA_WIDTH-1:0]  RS2_e,
@@ -69,7 +67,6 @@ always_ff @(posedge clk) begin
                 RD2_e <= RD2_d;
                 RS1_e <= RS1_d;
                 RS2_e <= RS2_d;
-                ImmExt_e <= ImmExt_d;
                 Rd_e <= Rd_d;
                 ImmOp_e <= ImmOp_d;
                 RegWrite_e <= RegWrite_d;
@@ -92,7 +89,6 @@ always_ff @(posedge clk) begin
         PCPlus4_e <= 32'b0;
         RD1_e <= 32'b0;
         RD2_e <= 32'b0;
-        ImmExt_e <= 32'b0;
         Rd_e <= 5'b0;
         ImmOp_e <= 32'b0;
         RegWrite_e <= 1'b0;
