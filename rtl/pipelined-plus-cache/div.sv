@@ -4,7 +4,7 @@ module div #(
 ) (
     input logic [DATA_WIDTH-1:0] op1,
     input logic [DATA_WIDTH-1:0] op2,
-    input logic [DIV_CTRL-1:0] ctrl,
+    input logic [DIV_CTRL-1:0] div_ctrl,
     
     output logic [DATA_WIDTH-1:0] result
 
@@ -15,7 +15,7 @@ always_comb begin
         result = 0;
     end 
     else
-        case(ctrl)
+        case(div_ctrl)
             3'b100: result = $signed(op1) / $signed(op2);
             3'b101: result = $unsigned(op1) / $unsigned(op2);
             3'b110: result = $signed(op1) % $signed(op2);

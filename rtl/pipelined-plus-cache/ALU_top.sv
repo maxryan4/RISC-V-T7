@@ -10,8 +10,10 @@ module ALU_top #(
     output logic EQ // 1 if branching
 );
 
-logic [DATA_WIDTH-1:0] ALU_result;
-logic [DATA_WIDTH-1:0] mul_result;
+logic [DATA_WIDTH-1:0] ALU_result; // output from alu module
+logic [DATA_WIDTH-1:0] mul_result; // result of multiplication
+logic [DATA_WIDTH-1:0] div_result; // result of division
+logic [DATA_WIDTH-1:0] M_result; // result of M type instruction
 
 ALU ALU (
     .ALUop1(ALUop1),
@@ -22,15 +24,29 @@ ALU ALU (
 );
 
 mul mul (
-    .a(ALUop1),
-    .b(ALUop2),
+    .op1(ALUop1),
+    .op2(ALUop2),
     .mul_ctrl(ALUctrl[1:0]),
     .result(mul_result)
 );
 
-mux ALU_or_mul (
+div div (
+    .op1(ALUop1),
+    .op2(ALUop2),
+    .div_ctrl(ALUctrl[2:0]),
+    .result(div_result)
+);
+
+mux mul_or_div (
+    .in0(mul_result),
+    .in1(div_result),
+    .sel(ALUctrl[2]), // MSB of func3 determines if it is a mul or div instruction
+    .out(M_result)
+);
+
+mux ALU_or_M ( // select between ALU and M type
     .in0(ALU_result),
-    .in1(mul_result),
+    .in1(M_result),
     .sel(mul_sel),
     .out(ALUout)
 );
