@@ -38,19 +38,22 @@ module dynamic_branch_predictor #(
         predict_taken = 1'b0;           // default values
         branch_target = PC_f;           // default values
 
-        if (BTB[index_f].valid && (BTB[index_f].tag == tag_f)) begin        // check if entry valid and tag matches
-            if (BTB[index_f].type || (BTB[index_f].pred[1] == 1'b1)) begin  // check if uncond or ST (11) or WT (10)  
-                predict_taken = 1'b1;                   // if unconditional inst or ST or WT then predict taken and branch  
-                branch_target = BTB[index_f].target;
+        if ((RD[6:0] == 7'b1100011) || (RD[6:0] == 7'b1101111)) begin           // check if instr is a jump
+            if (BTB[index_f].valid && (BTB[index_f].tag == tag_f)) begin        // check if entry valid and tag matches
+                if (BTB[index_f].type || (BTB[index_f].pred[1] == 1'b1)) begin  // check if uncond or ST (11) or WT (10)  
+                    predict_taken = 1'b1;                   // if unconditional inst or ST or WT then predict taken and branch  
+                    branch_target = BTB[index_f].target;
+                end
             end
         end
     end
 
-    always_ff @(posedge clk or negedge rst) begin
 
+    always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
             for (int i = 0; i < BTB_ROWS; i++) begin
                 BTB[i].valid <= 1'b0;       // set valid bit of all BTB entry to 0 if rst asserted
+                BTB[i].pred  <= 2'b10       // set pred to weakly taken
             end
         end
 
