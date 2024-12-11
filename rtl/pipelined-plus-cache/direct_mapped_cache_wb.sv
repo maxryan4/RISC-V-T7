@@ -143,7 +143,7 @@ module direct_mapped_cache_wb #(
                     wb_cyc_o <= 1'b1;
                     wb_stb_o <= 1'b1;
                     wb_dat_o <= cpu_wr_data;
-                    wb_sel_o <= cache_wr;
+                    wb_sel_o <= cpu_cache_wr;
                     wb_we_o <= 1'b1;
                 end else if (cpu_stall&!cpu_mem_write_i) begin
                     if (valid_read&dirty_read) begin
