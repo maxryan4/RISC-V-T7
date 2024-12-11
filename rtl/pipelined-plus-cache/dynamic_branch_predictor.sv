@@ -17,11 +17,11 @@ module dynamic_branch_predictor #(
 
     // this is the branch target buffer
     typedef struct packed {
-        logic                   valid,  // valid = 0 if BTB entry ignored in lookup
-        logic [DATA_WIDTH-1:0]  tag,    // stores upper bits of PC to check entry  is current PC
-        logic [DATA_WIDTH-1:0]  target, // target PC when branch taken
-        logic [1:0]             pred,   // 2 bit predictor counter: 11 = ST, 10 = WT, 01 = WN, 00 = SN
-        logic                   type    // type = 1 if *unconditional* jump
+        logic                   valid;  // valid = 0 if BTB entry ignored in lookup
+        logic [DATA_WIDTH-1:0]  tag;    // stores upper bits of PC to check entry  is current PC
+        logic [DATA_WIDTH-1:0]  target; // target PC when branch taken
+        logic [1:0]             pred;   // 2 bit predictor counter: 11 = ST, 10 = WT, 01 = WN, 00 = SN
+        logic                   type;    // type = 1 if *unconditional* jump
     } BTB_cols;
 
     BTB_cols BTB [BTB_ROWS-1:0];        // array of BTB entries
@@ -31,8 +31,8 @@ module dynamic_branch_predictor #(
 
     //--------------------------------
 
-    assign index = PC_f[5:2]            // used as index for BTB lookup
-    assign tag = PC_f[DATA_WIDTH-1:6]
+    assign index = PC_f[5:2];           // used as index for BTB lookup
+    assign tag = PC_f[DATA_WIDTH-1:6];
 
     always_comb begin
         predict_taken = 1'b0;           // default values
@@ -56,7 +56,7 @@ module dynamic_branch_predictor #(
 
         // all this is to update BTB when we actually know if branch taken or not
         else begin
-            logic [3:0] update_index = branch_actual_target[5:2]
+            logic [3:0] update_index = branch_actual_target[5:2];
                                     // if instr = cond. jump   or if instr = JAL uncond. jump
             if (branch_actual_taken || (RD[6:0] == 7'b1100011) || (RD[6:0] == 7'b1101111)) begin
                 BTB[update_index].valid  <= 1'b1;       
