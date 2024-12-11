@@ -18,7 +18,7 @@ always_comb begin
         case(ctrl)
             3'b100: result = $signed(op1) / $signed(op2);
             3'b101: result = $unsigned(op1) / $unsigned(op2);
-            3'b110: result = op1 % op2;
+            3'b110: result = $signed(op1) % $signed(op2);
             3'b111: result = $unsigned(op1) % $unsigned(op2);
             default: result = 0;
         endcase
