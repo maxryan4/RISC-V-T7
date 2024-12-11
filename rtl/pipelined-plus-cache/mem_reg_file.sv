@@ -23,7 +23,7 @@ module mem_reg_file #(parameter
     output logic [READ_DATA_WIDTH-1:0]  Rd_w
 );
 
-always_ff @(posedge clk or negedge rst_n) begin
+always_ff @(posedge clk) begin
     if (rst_n) begin
         if (en) begin
             if(valid_m) begin

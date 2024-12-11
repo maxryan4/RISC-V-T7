@@ -17,15 +17,14 @@ module fetch_reg_file #(
     output logic [DATA_WIDTH-1:0]       PCPlus4_d
 );
 
-always_ff @(posedge clk or negedge rst_n) begin
+always_ff @(posedge clk) begin
     if (rst_n) begin
         if (en) begin
-            if (valid_f) begin
-                read_data_d <= read_data_f;
-                PC_d <= PC_f;
-                PCPlus4_d <= PCPlus4_f;
-            end
-            valid_d <= valid_f;
+            read_data_d <= read_data_f;
+            PC_d <= PC_f;
+            PCPlus4_d <= PCPlus4_f;
+            valid_d <= 1'b1;
+            //valid_d <= valid_f;
         end
     end
     else begin

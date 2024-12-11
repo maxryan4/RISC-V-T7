@@ -9,7 +9,7 @@ module top #(
 
   // every PCat is carried from one module to another
   // labels are (mostly) the exact same as the diagram on github.
-  /* verilator lint_on UNUSED*/ 
+  /* verilator lint_off UNUSED*/ 
   logic [DATA_WIDTH-1:0] PC_f;
   logic [DATA_WIDTH-1:0] PC_d;
   logic [DATA_WIDTH-1:0] PC_e;
@@ -84,17 +84,25 @@ module top #(
   logic valid_d;
   logic valid_e;
   logic valid_m;
+  logic hazard1;
+  logic hazard2;
+  logic hazard;
+  logic f_RD1;
+  logic f_RD2;
+  logic [4:0] RS1_e;
+  logic [4:0] RS2_e;
+  logic [DATA_WIDTH-1:0] RS1_fdata;
+  logic [DATA_WIDTH-1:0] RS2_fdata;
+  logic [DATA_WIDTH-1:0] RD1_forwarded;
+  logic [DATA_WIDTH-1:0] RD2_forwarded;
+  
+  wire en_f, en_d, en_e, en_m;
   /* verilator lint_on UNUSED */ 
 
 
-  // remove when implement hazard unit
   initial begin
-    en = 1'b1;
     rst_n = 1'b1;
     valid_f = 1'b1;
-    //valid_d = 1'b1;
-    //valid_e = 1'b1;
-    //valid_m = 1'b1;
   end
 
   //instantiating a module for each part of the CPU
@@ -124,7 +132,7 @@ module top #(
 
   fetch_reg_file fetch_reg_file (
     .clk(clk),
-    .en(en),
+    .en(en_f),
     .rst_n(rst_n),
     .valid_f(valid_f),
     .read_data_f(instr_f),
@@ -136,6 +144,62 @@ module top #(
     .PCPlus4_d(PCPlus4_d)
   );
 
+  /*
+  logic en;
+  logic rst_n;
+  logic valid_f;
+  logic valid_d;
+  logic valid_e;
+  logic valid_m;
+  */
+  
+  mux Rs1Select(
+    .in0(RD1_e),
+    .in1(RS1_fdata),
+    .sel(f_RD1),
+    .out(RD1_forwarded)
+  );
+
+  mux Rs2Select(
+    .in0(RD2_e),
+    .in1(RS2_fdata),
+    .sel(f_RD2),
+    .out(RD2_forwarded)
+  );
+
+  // ------ Pipelining Hazard Unit ------ 
+  
+  hazard_unit hazard_unit1(
+    .execute_reg(RS1_e),
+    .load_m(RegWrite_m),
+    .valid_e(valid_e),
+    .valid_m(valid_m),
+    .valid_w(RegWrite_w),
+    .dest_m(Rd_m),
+    .dest_w(Rd_w),
+    .data_m(ReadData_m),
+    .data_w(ReadData_w),
+
+    .forward(f_RD1),
+    .hazard(hazard1),
+    .data(RS1_fdata)
+  );
+
+  hazard_unit hazard_unit2 (
+    .execute_reg(RS2_e),
+    .load_m(RegWrite_m),
+    .valid_e(valid_e),
+    .valid_m(valid_m),
+    .valid_w(RegWrite_w),
+    .dest_m(Rd_m),
+    .dest_w(Rd_w),
+    .data_m(ReadData_m),
+    .data_w(ReadData_w),
+
+    .forward(f_RD2),
+    .hazard(hazard2),
+    .data(RS2_fdata)
+  );
 
   // ------ Decode stage ------
 
@@ -198,7 +262,7 @@ mux UIMux(
   decode_reg_file decode_reg_file(
     .clk(clk),
     .rst_n(rst_n),
-    .en(en),
+    .en(en_d),
     .valid_d(valid_d),
 
     .PC_d(PC_d),
@@ -219,7 +283,11 @@ mux UIMux(
     .MemCtrl_d(MemCtrl_d),
     .RD1_control_d(RD1_control_d),
     .PC_RD1_control_d(PC_RD1_control_d),
+    .RS1_d(instr_d[19:15]),
+    .RS2_d(instr_d[24:20]),
 
+    .RS1_e(RS1_e),
+    .RS2_e(RS2_e),
     .valid_e(valid_e),
     .PC_e(PC_e),
     .PCPlus4_e(PCPlus4_e),
@@ -246,13 +314,13 @@ mux UIMux(
 
   mux Op1Mux(
       .in0(UI_out_e),  
-      .in1(RD1_e),
+      .in1(RD1_forwarded),
       .sel(RD1_control_e),
       .out(ALUop1)
   );
 
   mux Op2Mux(
-      .in0(RD2_e),
+      .in0(RD2_forwarded),
       .in1(ImmExt_e),
       .sel(ALUSrc_e),
       .out(ALUop2)
@@ -272,12 +340,14 @@ mux UIMux(
   end
 
 
+
+
   // ------ Pipelining execute to memory stage ------
 
   execute_reg_file execute_reg_file (
     .clk(clk),
     .rst_n(rst_n),
-    .en(en),
+    .en(en_e),
     .valid_e(valid_e),
     
     .PCPlus4_e(PCPlus4_e),
@@ -319,7 +389,7 @@ mux UIMux(
 
   mem_reg_file mem_reg_file (
     .clk(clk),
-    .en(en),
+    .en(en_m),
     .rst_n(rst_n),
     .valid_m(valid_m),
     .PCPlus4_m(PCPlus4_m),
@@ -349,10 +419,16 @@ mux UIMux(
 
 
   // assigning signals that don't have an input.
+  assign hazard = hazard1 | hazard2;
   assign rs1 = instr_d[19:15];
   assign rs2 = instr_d[24:20];
   assign Rd_d = instr_d[11:7];
   assign read_addr = PC_f[11:0];
+  assign en_f = en_d;
+  assign en_d = en_e;
+  assign en_e = hazard| en_m;
+  //assign en_m = !cpu_stall_o;
+  assign en_m = 1'b1;
   //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)
 
 
