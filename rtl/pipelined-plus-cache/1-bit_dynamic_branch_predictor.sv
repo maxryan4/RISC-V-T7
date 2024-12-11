@@ -20,8 +20,8 @@ module dynamic_branch_predictor #(
         logic                   valid;  // valid = 0 if BTB entry ignored in lookup
         logic [DATA_WIDTH-1:0]  tag;    // stores upper bits of PC to check entry  is current PC
         logic [DATA_WIDTH-1:0]  target; // target PC when branch taken
-        logic [1:0]             pred;   // 2 bit predictor counter: 11 = ST, 10 = WT, 01 = WN, 00 = SN
-        logic                   type;    // type = 1 if *unconditional* jump
+        logic                   pred;   // 1 bit predictor counter: T (taken: 1), N (not taken: 0)
+        logic                   uncond; // uncond = 1 if *unconditional* jump
     } BTB_cols;
 
     BTB_cols BTB [BTB_ROWS-1:0];        // array of BTB entries
@@ -40,7 +40,7 @@ module dynamic_branch_predictor #(
 
         if ((RD[6:0] == 7'b1100011) || (RD[6:0] == 7'b1101111)) begin           // check if instr is a jump
             if (BTB[index_f].valid && (BTB[index_f].tag == tag_f)) begin        // check if entry valid and tag matches
-                if (BTB[index_f].type || (BTB[index_f].pred[1] == 1'b1)) begin  // check if uncond or ST (11) or WT (10)  
+                if (BTB[index_f].uncond || (BTB[index_f].pred == 1'b1)) begin   // check if uncond or taken (1)
                     predict_taken = 1'b1;                   // if unconditional inst or ST or WT then predict taken and branch  
                     branch_target = BTB[index_f].target;
                 end
@@ -53,7 +53,7 @@ module dynamic_branch_predictor #(
         if (rst) begin
             for (int i = 0; i < BTB_ROWS; i++) begin
                 BTB[i].valid <= 1'b0;       // set valid bit of all BTB entry to 0 if rst asserted
-                BTB[i].pred  <= 2'b10       // set pred to weakly taken
+                BTB[i].pred  <= 1'b0;       // assume not taken
             end
         end
 
@@ -65,18 +65,14 @@ module dynamic_branch_predictor #(
                 BTB[update_index].valid  <= 1'b1;       
                 BTB[update_index].tag    <= branch_actual_target[DATA_WIDTH-1:6];   // update tag
                 BTB[update_index].target <= branch_actual_target;                   // update target PC
-                BTB[update_index].type   <= (RD[6:0] == 7'b1101111);                // JAL uncond. jump
+                BTB[update_index].uncond   <= (RD[6:0] == 7'b1101111);              // JAL uncond. jump
             end
 
-            // this updates 2 bit predictor
-            if (branch_actual_taken) begin                  // if branch is actually taken
-                if (BTB[update_index].pred < 2'b11) begin   // and pred not already ST (11), increment by 1
-                    BTB[update_index].pred <= BTB[update_index].pred + 2'b01;
-                end
-            end else begin                                  // if branch is not actually taken
-                if (BTB[update_index].pred > 2'b00) begin   // and pred not already SN (00), decrement by 1
-                    BTB[update_index].pred <= BTB[update_index].pred - 2'b01;
-                end
+            // this updates 1 bit predictor
+            if (branch_actual_taken) begin          // if branch is actually taken
+                BTB[update_index].pred <= 1'b1;     // set pred to T (1)
+            end else begin                          // if branch is not actually taken
+                BTB[update_index].pred <= 1'b0;     // set pred to N (0)
             end
         end
     end
