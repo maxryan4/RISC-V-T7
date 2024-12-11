@@ -17,8 +17,8 @@ module direct_mapped_cache_wb #(
     /**
         Note:
             When using this cache, data is valid, and may be forwarded to the writeback stage, IFF 
-                !cpu_stall_o
-            when cpu_stall_o is high, all subsequent stages must be stalled.
+                !cpu_stall
+            when cpu_stall is high, all subsequent stages must be stalled.
     **/
     // Backing memory in
     input   wire logic              wb_stall_i, // Wishbone signal: stall_i
@@ -27,7 +27,7 @@ module direct_mapped_cache_wb #(
     input   wire logic              wb_err_i, // Wishbone signal: error (should never be high)
     // CPU interface out
     output       logic [31:0]       cpu_data_o, // CPU Data out, formatted for the registers already
-    output       logic              cpu_stall_o, // IFF this signal is high, then the rest of the stages in the CPU **MUST** be stalled
+    output       logic              cpu_en_o, // IFF this signal is low, then the rest of the stages in the CPU **MUST** be stalled
     // Backing memory out
     output       logic              wb_cyc_o,
     output       logic              wb_stb_o,
@@ -64,6 +64,7 @@ module direct_mapped_cache_wb #(
     wire  [$clog2(RAM_SZ)-1:0]   fill_addr;
     wire  [$clog2(RAM_SZ)-1:0]   evict_addr;
     wire  [$clog2(RAM_SZ)-1:0]   ram_wr_addr;
+    wire                         cpu_stall;
     assign ram_wr_data = cache_fill ? wb_dat_i : cpu_wr_data;
     assign cache_wr = cache_fill ? {4{wb_ack_i&!wb_err_i}} : {cpu_cache_wr&{4{cpu_mem_write_i}}&{4{cpu_match}}};
     assign cache_fill = cache_state==CACHE_FILL;
@@ -85,13 +86,13 @@ module direct_mapped_cache_wb #(
     assign dirty_read = dirty[cpu_set];
 
     assign cpu_match = valid_read&&(tag_read==cpu_tag);
-    assign cpu_stall_o = cpu_valid_i&(!cpu_match & !(wb_ack_i&cpu_mem_write_i)); // stall when load/store references uncached line, and exception when wb_ack_i&cpu_mem_write_i
+    assign cpu_stall = cpu_valid_i&(!cpu_match & !(wb_ack_i&cpu_mem_write_i)); // stall when load/store references uncached line, and exception when wb_ack_i&cpu_mem_write_i
     
     generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
         assign cpu_rd_addr = cpu_set;
     end else begin : __if_spatial
         assign cpu_rd_addr = {cpu_set, 
-        cpu_stall_o&!cpu_mem_write_i&dirty_read ? {CACHE_LINE_SIZE_MULT_POW2{1'b0}} : cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
+        cpu_stall&!cpu_mem_write_i&dirty_read ? {CACHE_LINE_SIZE_MULT_POW2{1'b0}} : cpu_addr_i[CACHE_LINE_SIZE_MULT_POW2+1:2]};
     end endgenerate
 
     assign ram_rd_addr = cache_state==CACHE_EVICT ? evict_addr : cpu_rd_addr;
@@ -115,7 +116,7 @@ module direct_mapped_cache_wb #(
             if ((cache_state==CACHE_FILL)&&wb_ack_i) begin
                 counter <= counter + 1;
             end
-            if ((cpu_stall_o&!cpu_mem_write_i&valid_read&dirty_read&(cache_state==CACHE_IDLE))||(cache_state==CACHE_EVICT&&!wb_stall_i&&!evict_pend_condition)) begin
+            if ((cpu_stall&!cpu_mem_write_i&valid_read&dirty_read&(cache_state==CACHE_IDLE))||(cache_state==CACHE_EVICT&&!wb_stall_i&&!evict_pend_condition)) begin
                 evict_rq_counter <= evict_rq_counter+1;
             end
             if ((cache_state==CACHE_EVICT)&&wb_ack_i) begin
@@ -136,7 +137,7 @@ module direct_mapped_cache_wb #(
                 if (cpu_match&cpu_valid_i&cpu_mem_write_i) begin
                     dirty[cpu_set] <= 1'b1;
                 end
-                if (cpu_stall_o&cpu_mem_write_i) begin
+                if (cpu_stall&cpu_mem_write_i) begin
                     cache_state <= CACHE_WRITE;
                     wb_adr_o <= cpu_addr_i[AW+1:2];
                     wb_cyc_o <= 1'b1;
@@ -144,7 +145,7 @@ module direct_mapped_cache_wb #(
                     wb_dat_o <= cpu_wr_data;
                     wb_sel_o <= cache_wr;
                     wb_we_o <= 1'b1;
-                end else if (cpu_stall_o&!cpu_mem_write_i) begin
+                end else if (cpu_stall&!cpu_mem_write_i) begin
                     if (valid_read&dirty_read) begin
                         cache_state <= CACHE_EVICT;
                         wb_adr_o <= {tag_read, cpu_set, {CACHE_LINE_SIZE_MULT_POW2{1'b0}}};
@@ -217,4 +218,5 @@ module direct_mapped_cache_wb #(
             end
         end
     end
+    assign cpu_en_o = !cpu_stall;
 endmodule

@@ -17,8 +17,8 @@ module direct_mapped_cache_wt #(
     /**
         Note:
             When using this cache, data is valid, and may be forwarded to the writeback stage, IFF 
-                !cpu_stall_o
-            when cpu_stall_o is high, all subsequent stages must be stalled.
+                !cpu_stall
+            when cpu_stall is high, all subsequent stages must be stalled.
     **/
     // Backing memory in
     input   wire logic              wb_stall_i, // Wishbone signal: stall_i
@@ -27,7 +27,7 @@ module direct_mapped_cache_wt #(
     input   wire logic              wb_err_i, // Wishbone signal: error (should never be high)
     // CPU interface out
     output       logic [31:0]       cpu_data_o, // CPU Data out, formatted for the registers already
-    output       logic              cpu_stall_o, // IFF this signal is high, then the rest of the stages in the CPU **MUST** be stalled
+    output       logic              cpu_en_o, // IFF this signal is high, then the rest of the stages in the CPU **MUST** be stalled
     // Backing memory out
     output       logic              wb_cyc_o,
     output       logic              wb_stb_o,
@@ -58,6 +58,7 @@ module direct_mapped_cache_wt #(
     wire                         cpu_match;
     wire  [$clog2(RAM_SZ)-1:0]   fill_addr;
     wire  [$clog2(RAM_SZ)-1:0]   ram_wr_addr;
+    wire                         cpu_stall;
     assign ram_wr_data = cache_fill ? wb_dat_i : cpu_wr_data;
     assign cache_wr = cache_fill ? {4{wb_ack_i&!wb_err_i}} : {cpu_cache_wr&{4{wb_ack_i&!wb_err_i}}};
     assign cache_fill = cache_state==CACHE_FILL;
@@ -78,7 +79,7 @@ module direct_mapped_cache_wt #(
     assign valid_read = valid[cpu_set];
 
     assign cpu_match = valid_read&&(tag_read==cpu_tag);
-    assign cpu_stall_o = cpu_valid_i&&((cpu_mem_write_i&!wb_ack_i)||(!cpu_match&!cpu_mem_write_i));
+    assign cpu_stall = cpu_valid_i&&((cpu_mem_write_i&!wb_ack_i)||(!cpu_match&!cpu_mem_write_i));
     
     generate if (CACHE_LINE_SIZE_MULT_POW2==0) begin : __if_no_spatial
         assign ram_rd_addr = cpu_set;
@@ -110,7 +111,7 @@ module direct_mapped_cache_wt #(
     always_ff @(posedge cpu_clock_i) begin
         case (cache_state)
             CACHE_IDLE: begin
-                if (cpu_stall_o&cpu_mem_write_i) begin
+                if (cpu_stall&cpu_mem_write_i) begin
                     cache_state <= CACHE_WRITE;
                     wb_adr_o <= cpu_addr_i[AW+1:2];
                     wb_cyc_o <= 1'b1;
@@ -118,7 +119,7 @@ module direct_mapped_cache_wt #(
                     wb_dat_o <= cpu_wr_data;
                     wb_sel_o <= cache_wr;
                     wb_we_o <= 1'b1;
-                end else if (cpu_stall_o&!cpu_mem_write_i) begin
+                end else if (cpu_stall&!cpu_mem_write_i) begin
                     cache_state <= CACHE_FILL;
                     wb_adr_o <= {cpu_addr_i[AW+1:2+CACHE_LINE_SIZE_MULT_POW2], {CACHE_LINE_SIZE_MULT_POW2{1'b0}}};
                     wb_cyc_o <= 1'b1;
@@ -162,4 +163,5 @@ module direct_mapped_cache_wt #(
             end
         end
     end
+    assign cpu_en_o = !cpu_stall;
 endmodule
