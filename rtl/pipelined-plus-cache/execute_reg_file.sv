@@ -8,6 +8,7 @@ module execute_reg_file #(
     input logic                         clk,
     input logic                         rst_n, // flush active low
     input logic                         en, // stall (if set low will stall)
+    input logic                         en_m,
     input logic                         valid_e, // valid for execute
 
     input logic [DATA_WIDTH-1:0]        PCPlus4_e,
@@ -41,13 +42,14 @@ always_ff @(posedge clk) begin
                 ALUResult_m <= ALUResult_e;
                 WriteData_m <= WriteData_e;
                 Rd_m <= Rd_e;
-
                 RegWrite_m <= RegWrite_e;
                 ResultSrc_m <= ResultSrc_e;
                 MemWrite_m <= MemWrite_e;
                 MemCtrl_m <= MemCtrl_e;
             end
             valid_m <= valid_e;
+        end else if (en_m) begin
+            valid_m <= 1'b0;
         end
     end
     else begin

@@ -174,8 +174,8 @@ module top #(
     .valid_w(RegWrite_w),
     .dest_m(Rd_m),
     .dest_w(Rd_w),
-    .data_m(ReadData_m),
-    .data_w(ReadData_w),
+    .data_m(ALUResult_m),
+    .data_w(Result_w),
 
     .forward(f_RD1),
     .hazard(hazard1),
@@ -190,8 +190,8 @@ module top #(
     .valid_w(RegWrite_w),
     .dest_m(Rd_m),
     .dest_w(Rd_w),
-    .data_m(ReadData_m),
-    .data_w(ReadData_w),
+    .data_m(ALUResult_m),
+    .data_w(Result_w),
 
     .forward(f_RD2),
     .hazard(hazard2),
@@ -322,7 +322,7 @@ mux UIMux(
 
   always_comb begin
     PCSrc_e = (Jump_e || (Branch_e && EQ))&valid_e;
-    WriteData_e = RD2_e;
+    WriteData_e = RD2_forwarded;
   end
 
 
@@ -334,6 +334,7 @@ mux UIMux(
     .clk(clk),
     .rst_n(1'b1),
     .en(en_e),
+    .en_m(en_m),
     .valid_e(valid_e),
     
     .PCPlus4_e(PCPlus4_e),
@@ -374,6 +375,7 @@ mux UIMux(
   mem_reg_file mem_reg_file (
     .clk(clk),
     .en(en_m),
+    .en_w(RegWrite_w),
     .rst_n(1'b1),
     .valid_m(valid_m),
     .PCPlus4_m(PCPlus4_m),
