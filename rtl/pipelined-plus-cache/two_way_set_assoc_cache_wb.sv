@@ -159,6 +159,13 @@ module two_way_set_assoc_cache_wb #(
     always_ff @(posedge cpu_clock_i) begin
         case (cache_state)
             CACHE_IDLE: begin
+                if ((|cpu_match)&cpu_valid_i&cpu_mem_write_i) begin
+                    if (cpu_match[0]) begin
+                        dirty0[cpu_set] <= 1'b1;
+                    end else begin
+                        dirty1[cpu_set] <= 1'b1;
+                    end
+                end
                 if (cpu_stall_o&cpu_mem_write_i) begin
                     cache_state <= CACHE_WRITE;
                     wb_adr_o <= cpu_addr_i[AW+1:2];
@@ -257,15 +264,5 @@ module two_way_set_assoc_cache_wb #(
                 
             end
         endcase
-    end
-
-    always_ff @(posedge cpu_clock_i) begin
-        if ((|cpu_match)&cpu_valid_i&cpu_mem_write_i) begin
-            if (cpu_match[0]) begin
-                dirty0[cpu_set] <= 1'b1;
-            end else begin
-                dirty1[cpu_set] <= 1'b1;
-            end
-        end
     end
 endmodule

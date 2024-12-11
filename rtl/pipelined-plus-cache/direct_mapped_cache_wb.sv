@@ -133,6 +133,9 @@ module direct_mapped_cache_wb #(
     always_ff @(posedge cpu_clock_i) begin
         case (cache_state)
             CACHE_IDLE: begin
+                if (cpu_match&cpu_valid_i&cpu_mem_write_i) begin
+                    dirty[cpu_set] <= 1'b1;
+                end
                 if (cpu_stall_o&cpu_mem_write_i) begin
                     cache_state <= CACHE_WRITE;
                     wb_adr_o <= cpu_addr_i[AW+1:2];
@@ -212,12 +215,6 @@ module direct_mapped_cache_wb #(
             if (cache_wr[k]) begin
                 cache_ram[ram_wr_addr][((k+1)*8)-1:k*8] <= ram_wr_data[((k+1)*8)-1:k*8];
             end
-        end
-    end
-
-    always_ff @(posedge cpu_clock_i) begin
-        if (cpu_match&cpu_valid_i&cpu_mem_write_i) begin
-            dirty[cpu_set] <= 1'b1;
         end
     end
 endmodule
