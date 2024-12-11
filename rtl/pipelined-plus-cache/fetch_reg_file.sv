@@ -31,6 +31,7 @@ always_ff @(posedge clk) begin
         read_data_d <= 32'b0;
         PC_d <= 32'b0;
         PCPlus4_d <= 32'b0;
+        valid_d <= 1'b0;
     end
 end
 

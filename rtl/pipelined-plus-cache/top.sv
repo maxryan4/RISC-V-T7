@@ -110,6 +110,7 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
+    .en_f(en_f),
     .RS1(RD1_forwarded),
     .PCaddsrc(PC_RD1_control_e),
     .PCsrc(PCSrc_e),
@@ -360,16 +361,25 @@ mux UIMux(
 
   // ------ Memory stage ------
 
-  data_memory data_memory (
-    .clk(clk),
-    .mem_write(MemWrite_m),
-    .mem_ctrl(MemCtrl_m),
-    .data_i(WriteData_m),
-    .addr_i(ALUResult_m[11:0]),
-    .data_o(ReadData_m)
+  //data_memory data_memory (
+  //  .clk(clk),
+  //  .mem_write(MemWrite_m),
+  //  .mem_ctrl(MemCtrl_m),
+  //  .data_i(WriteData_m),
+  //  .addr_i(ALUResult_m[11:0]),
+  //  .data_o(ReadData_m)
+  //);
+  wire mem_op_valid = (load_m|MemWrite_m)&valid_m;
+  mem_top #(10, 64, 0) data_memory_cache (
+    .cpu_clock_i(clk),
+    .cpu_addr_i(ALUResult_m[11:0]),
+    .cpu_data_i(WriteData_m),
+    .cpu_mem_ctrl_i(MemCtrl_m),
+    .cpu_mem_write_i(MemWrite_m),
+    .cpu_valid_i(mem_op_valid),
+    .cpu_data_o(ReadData_m),
+    .cpu_en_o(en_m)
   );
-
-
   // ------ Pipelining memory to write stage ------
 
   mem_reg_file mem_reg_file (
@@ -414,7 +424,7 @@ mux UIMux(
   assign en_d = en_e;
   assign en_e = !hazard&en_m;
   //assign en_m = !cpu_stall_o;
-  assign en_m = 1'b1;
+  //assign en_m = 1'b1;
   //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)
   assign rst_n = (!PCSrc_e&!rst);
 

@@ -57,7 +57,7 @@ always_ff @(posedge clk) begin
         ALUResult_m <= 32'b0;
         WriteData_m <= 32'b0;
         Rd_m <= 5'b0;
-        
+        valid_m <= 1'b0;
         RegWrite_m <= 1'b0;
         ResultSrc_m <= 2'b0;
         MemWrite_m <= 1'b0;

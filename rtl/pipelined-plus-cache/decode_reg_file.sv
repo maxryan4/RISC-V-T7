@@ -102,6 +102,7 @@ always_ff @(posedge clk) begin
         MemCtrl_e <= 3'b0;
         RD1_control_e <= 1'b0;
         PC_RD1_control_e <= 1'b0;
+        valid_e <= 1'b0;
     end
 end
 
