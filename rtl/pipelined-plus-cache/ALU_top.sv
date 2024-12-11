@@ -30,7 +30,7 @@ mul mul (
     .result(mul_result)
 );
 
-div div (
+div_sc div_sc (
     .op1(ALUop1),
     .op2(ALUop2),
     .div_ctrl(ALUctrl[2:0]),

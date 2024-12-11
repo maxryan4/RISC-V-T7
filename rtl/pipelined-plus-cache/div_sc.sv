@@ -1,4 +1,4 @@
-module div #(
+module div_sc #( // does division in one cycle but means that clock speed will be low as very large unit
     DATA_WIDTH = 32,
     DIV_CTRL = 3
 ) (
