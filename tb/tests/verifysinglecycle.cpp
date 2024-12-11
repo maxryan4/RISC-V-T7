@@ -18,7 +18,7 @@ protected:
 TEST_F(CpuTestbench, BaseProgramTest)
 {
   // method which compiles an asm file and stores the result in tests directory
-    compile("asm/program.S");
+    compile("asm/singlecycle/program.S");
 
     bool success = false;
   // test is a method which runs the cpu for a certain number of clock cycles and stops when a0 = first argument (254)
@@ -37,7 +37,7 @@ TEST_F(CpuTestbench, BaseProgramTest)
 
 TEST_F(CpuTestbench, BranchProgramTest)
 {
-    compile("asm/branchtest.S");
+    compile("asm/singlecycle/branchtest.S");
 
     bool success = false;
     success = test(6, CYCLES); 
@@ -54,7 +54,7 @@ TEST_F(CpuTestbench, BranchProgramTest)
 
 TEST_F(CpuTestbench, ArithmeticTest)
 {
-    compile("asm/arithmetictest.S");
+    compile("asm/singlecycle/arithmetictest.S");
 
     bool success = false;
     success = test(5, CYCLES); 
@@ -73,7 +73,7 @@ TEST_F(CpuTestbench, ArithmeticTest)
 
 TEST_F(CpuTestbench, LoadingAndJumpingTest)
 {
-    compile("asm/loadingandjump.S");
+    compile("asm/singlecycle/loadingandjump.S");
 
     bool success = false;
     success = test(4, CYCLES); 
@@ -92,7 +92,7 @@ TEST_F(CpuTestbench, LoadingAndJumpingTest)
 
 TEST_F(CpuTestbench, ShiftTest)
 {
-    compile("asm/shifttest.S");
+    compile("asm/singlecycle/shifttest.S");
 
     bool success = false;
     success = test(5, CYCLES); 
@@ -109,7 +109,7 @@ TEST_F(CpuTestbench, ShiftTest)
 
 TEST_F(CpuTestbench, ImmediateTesting)
 {
-    compile("asm/immediatetest.S");
+    compile("asm/singlecycle/immediatetest.S");
 
     bool success = false;
     success = test(9, CYCLES); 
@@ -125,7 +125,7 @@ TEST_F(CpuTestbench, ImmediateTesting)
 }
 TEST_F(CpuTestbench, LoadByteTesting)
 {
-    compile("asm/loadbytetest.S");
+    compile("asm/singlecycle/loadbytetest.S");
 
     bool success = false;
     success = test(4, CYCLES); 
