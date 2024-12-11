@@ -34,7 +34,7 @@ for file in "${files[@]}"; do
     name=$(basename "$file" _tb.cpp | cut -f1 -d\-)
     
     # If verify.cpp -> we are testing the top module
-    if [ $name == "verifysinglecycle.cpp" ]; then
+    if [ $name == "verifypipelined.cpp" ]; then
         name="top"
     fi
 
