@@ -7,16 +7,21 @@ unsigned int ticks = 0;
 
 class CpuTestbench : public Testbench
 {
+
 protected:
-    void initializeInputs() override
-    {
-        top->clk = 1;
-        top->rst = 0;
-    }
+    void initializeInputs(const std::string& file_name) override {
+        top->clk = 1; // Initialize clock
+        top->rst = 0; // Initialize reset
+
+        std::string filepath = "tests/waveforms/" + file_name + ".vcd";
+
+        tfp->open(filepath.c_str());
+    };
 };
 
 TEST_F(CpuTestbench, BaseProgramTest)
 {
+  initializeInputs("program");
   // method which compiles an asm file and stores the result in tests directory
     compile("asm/singlecycle/program.S");
 
@@ -37,6 +42,7 @@ TEST_F(CpuTestbench, BaseProgramTest)
 
 TEST_F(CpuTestbench, BranchProgramTest)
 {
+    initializeInputs("branchtest");
     compile("asm/singlecycle/branchtest.S");
 
     bool success = false;
@@ -54,6 +60,7 @@ TEST_F(CpuTestbench, BranchProgramTest)
 
 TEST_F(CpuTestbench, ArithmeticTest)
 {
+    initializeInputs("arithmetictest");
     compile("asm/singlecycle/arithmetictest.S");
 
     bool success = false;
@@ -73,6 +80,7 @@ TEST_F(CpuTestbench, ArithmeticTest)
 
 TEST_F(CpuTestbench, LoadingAndJumpingTest)
 {
+    initializeInputs("loadingandjump");
     compile("asm/singlecycle/loadingandjump.S");
 
     bool success = false;
@@ -92,6 +100,7 @@ TEST_F(CpuTestbench, LoadingAndJumpingTest)
 
 TEST_F(CpuTestbench, ShiftTest)
 {
+    initializeInputs("shifttest");
     compile("asm/singlecycle/shifttest.S");
 
     bool success = false;
@@ -109,6 +118,7 @@ TEST_F(CpuTestbench, ShiftTest)
 
 TEST_F(CpuTestbench, ImmediateTesting)
 {
+    initializeInputs("immediatetest");
     compile("asm/singlecycle/immediatetest.S");
 
     bool success = false;
@@ -125,6 +135,7 @@ TEST_F(CpuTestbench, ImmediateTesting)
 }
 TEST_F(CpuTestbench, LoadByteTesting)
 {
+    initializeInputs("loadbytetest");
     compile("asm/singlecycle/loadbytetest.S");
 
     bool success = false;
