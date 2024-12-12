@@ -3,6 +3,7 @@ module pc_top #(
 ) (
     input   logic                   clk,
     input   logic                   rst,
+    input   logic                   en_f,
     input   logic                   PCsrc,
     input   logic [DATA_WIDTH-1:0]  ImmOp,
     input   logic [DATA_WIDTH-1:0]  RS1,
@@ -17,9 +18,17 @@ module pc_top #(
     // internal signals
     logic [DATA_WIDTH-1:0] branch_PC;
     // logic [DATA_WIDTH-1:0] inc_PC;
+    logic [DATA_WIDTH-1:0] next_PCX;
     logic [DATA_WIDTH-1:0] next_PC;
-
     // instantiating modules
+
+    mux mux_st (
+        .in0(PC),
+        .in1(next_PCX),
+        .sel(en_f),
+        .out(next_PC)
+    );
+
     pc_reg pc_reg (
         .clk(clk),
         .rst(rst),
@@ -49,7 +58,7 @@ module pc_top #(
         .in0(branch_predict_PC),
         .in1(branch_PC),
         .sel(PCsrc),
-        .out(next_PC)
+        .out(next_PCX)
     );
 
     mux branch_predict_mux (

@@ -9,7 +9,7 @@ module top #(
 
   // every PCat is carried from one module to another
   // labels are (mostly) the exact same as the diagram on github.
-  /* verilator lint_on UNUSED*/ 
+  /* verilator lint_off UNUSED*/ 
   logic [DATA_WIDTH-1:0] PC_f;
   logic [DATA_WIDTH-1:0] PC_d;
   logic [DATA_WIDTH-1:0] PC_e;
@@ -63,8 +63,6 @@ module top #(
   logic [DATA_WIDTH-1:0] RD2_e;
   logic [4:0] Rd_d;
   logic [4:0] Rd_e;
-  logic [DATA_WIDTH-1:0] ImmExt_d;
-  logic [DATA_WIDTH-1:0] ImmExt_e;
   logic [DATA_WIDTH-1:0] UI_out_d;
   logic [DATA_WIDTH-1:0] UI_out_e;
   logic [2:0] MemCtrl_d;
@@ -84,17 +82,24 @@ module top #(
   logic valid_d;
   logic valid_e;
   logic valid_m;
+  logic hazard1;
+  logic hazard2;
+  logic hazard;
+  logic f_RD1;
+  logic f_RD2;
+  logic [4:0] RS1_e;
+  logic [4:0] RS2_e;
+  logic [DATA_WIDTH-1:0] RS1_fdata;
+  logic [DATA_WIDTH-1:0] RS2_fdata;
+  logic [DATA_WIDTH-1:0] RD1_forwarded;
+  logic [DATA_WIDTH-1:0] RD2_forwarded;
+  
+  wire en_f, en_d, en_e, en_m;
   /* verilator lint_on UNUSED */ 
 
 
-  // remove when implement hazard unit
   initial begin
-    en = 1'b1;
-    rst_n = 1'b1;
     valid_f = 1'b1;
-    //valid_d = 1'b1;
-    //valid_e = 1'b1;
-    //valid_m = 1'b1;
   end
 
   //instantiating a module for each part of the CPU
@@ -105,7 +110,8 @@ module top #(
   pc_top pc (
     .clk(clk),
     .rst(rst),
-    .RS1(RD1_e),
+    .en_f(en_f),
+    .RS1(RD1_forwarded),
     .PCaddsrc(PC_RD1_control_e),
     .PCsrc(PCSrc_e),
     .ImmOp(ImmOp_e),
@@ -124,7 +130,7 @@ module top #(
 
   fetch_reg_file fetch_reg_file (
     .clk(clk),
-    .en(en),
+    .en(en_f),
     .rst_n(rst_n),
     .valid_f(valid_f),
     .read_data_f(instr_f),
@@ -136,17 +142,71 @@ module top #(
     .PCPlus4_d(PCPlus4_d)
   );
 
+  /*
+  logic en;
+  logic rst_n;
+  logic valid_f;
+  logic valid_d;
+  logic valid_e;
+  logic valid_m;
+  */
+  
+  mux Rs1Select(
+    .in0(RD1_e),
+    .in1(RS1_fdata),
+    .sel(f_RD1),
+    .out(RD1_forwarded)
+  );
+
+  mux Rs2Select(
+    .in0(RD2_e),
+    .in1(RS2_fdata),
+    .sel(f_RD2),
+    .out(RD2_forwarded)
+  );
+
+  // ------ Pipelining Hazard Unit ------ 
+  wire load_m = ResultSrc_m==2'd1;
+  hazard_unit hazard_unit1(
+    .execute_reg(RS1_e),
+    .load_m(load_m),
+    .valid_e(valid_e),
+    .valid_m(valid_m),
+    .valid_w(RegWrite_w),
+    .dest_m(Rd_m),
+    .dest_w(Rd_w),
+    .data_m(ALUResult_m),
+    .data_w(Result_w),
+
+    .forward(f_RD1),
+    .hazard(hazard1),
+    .data(RS1_fdata)
+  );
+
+  hazard_unit hazard_unit2 (
+    .execute_reg(RS2_e),
+    .load_m(load_m),
+    .valid_e(valid_e),
+    .valid_m(valid_m),
+    .valid_w(RegWrite_w),
+    .dest_m(Rd_m),
+    .dest_w(Rd_w),
+    .data_m(ALUResult_m),
+    .data_w(Result_w),
+
+    .forward(f_RD2),
+    .hazard(hazard2),
+    .data(RS2_fdata)
+  );
 
   // ------ Decode stage ------
 
   control_unit control_unit (
-    .EQ(EQ),
     .instr(instr_d),
     .RegWrite(RegWrite_d),
     .ALUctrl(ALUControl_d),
     .ALUsrc(ALUSrc_d),
     .ImmSrc(ImmSrc),
-    .PCsrc(Jump_d),
     .Branch(Branch_d),
     .Jump(Jump_d),
     .destsrc(ResultSrc_d),
@@ -178,13 +238,6 @@ module top #(
     .immop(ImmOp_d)
   );
 
-  mux ImmMux(
-    .in0(32'd4),
-    .in1(ImmOp_d),
-    .sel(four_imm_control),
-    .out(ImmExt_d)
-);
-
 mux UIMux(
     .in0(32'b0),  
     .in1(PC_d),
@@ -198,14 +251,13 @@ mux UIMux(
   decode_reg_file decode_reg_file(
     .clk(clk),
     .rst_n(rst_n),
-    .en(en),
+    .en(en_d),
     .valid_d(valid_d),
 
     .PC_d(PC_d),
     .PCPlus4_d(PCPlus4_d),
     .RD1_d(RD1_d),
     .RD2_d(RD2_d),
-    .ImmExt_d(ImmExt_d),
     .Rd_d(Rd_d),
     .ImmOp_d(ImmOp_d),
     .RegWrite_d(RegWrite_d),
@@ -219,13 +271,16 @@ mux UIMux(
     .MemCtrl_d(MemCtrl_d),
     .RD1_control_d(RD1_control_d),
     .PC_RD1_control_d(PC_RD1_control_d),
+    .RS1_d(instr_d[19:15]),
+    .RS2_d(instr_d[24:20]),
 
+    .RS1_e(RS1_e),
+    .RS2_e(RS2_e),
     .valid_e(valid_e),
     .PC_e(PC_e),
     .PCPlus4_e(PCPlus4_e),
     .RD1_e(RD1_e),
     .RD2_e(RD2_e),
-    .ImmExt_e(ImmExt_e),
     .Rd_e(Rd_e),
     .ImmOp_e(ImmOp_e),
     .RegWrite_e(RegWrite_e),
@@ -246,14 +301,14 @@ mux UIMux(
 
   mux Op1Mux(
       .in0(UI_out_e),  
-      .in1(RD1_e),
+      .in1(RD1_forwarded),
       .sel(RD1_control_e),
       .out(ALUop1)
   );
 
   mux Op2Mux(
-      .in0(RD2_e),
-      .in1(ImmExt_e),
+      .in0(RD2_forwarded),
+      .in1(ImmOp_e),
       .sel(ALUSrc_e),
       .out(ALUop2)
   );
@@ -267,17 +322,20 @@ mux UIMux(
   );
 
   always_comb begin
-    PCSrc_e = Jump_e || (Branch_e && EQ);
-    WriteData_e = RD2_e;
+    PCSrc_e = (Jump_e || (Branch_e && EQ))&valid_e;
+    WriteData_e = RD2_forwarded;
   end
+
+
 
 
   // ------ Pipelining execute to memory stage ------
 
   execute_reg_file execute_reg_file (
     .clk(clk),
-    .rst_n(rst_n),
-    .en(en),
+    .rst_n(1'b1),
+    .en(en_e),
+    .en_m(en_m),
     .valid_e(valid_e),
     
     .PCPlus4_e(PCPlus4_e),
@@ -303,24 +361,32 @@ mux UIMux(
 
   // ------ Memory stage ------
 
-  wire [31:0] ALUResult_m;
-
-  data_memory data_memory (
-    .clk(clk),
-    .mem_write(MemWrite_m),
-    .mem_ctrl(MemCtrl_m),
-    .data_i(WriteData_m),
-    .addr_i(ALUResult_m[11:0]),
-    .data_o(ReadData_m)
+  //data_memory data_memory (
+  //  .clk(clk),
+  //  .mem_write(MemWrite_m),
+  //  .mem_ctrl(MemCtrl_m),
+  //  .data_i(WriteData_m),
+  //  .addr_i(ALUResult_m[11:0]),
+  //  .data_o(ReadData_m)
+  //);
+  wire mem_op_valid = (load_m|MemWrite_m)&valid_m;
+  mem_top #(10, 64, 0) data_memory_cache (
+    .cpu_clock_i(clk),
+    .cpu_addr_i(ALUResult_m[11:0]),
+    .cpu_data_i(WriteData_m),
+    .cpu_mem_ctrl_i(MemCtrl_m),
+    .cpu_mem_write_i(MemWrite_m),
+    .cpu_valid_i(mem_op_valid),
+    .cpu_data_o(ReadData_m),
+    .cpu_en_o(en_m)
   );
-
-
   // ------ Pipelining memory to write stage ------
 
   mem_reg_file mem_reg_file (
     .clk(clk),
-    .en(en),
-    .rst_n(rst_n),
+    .en(en_m),
+    .en_w(RegWrite_w),
+    .rst_n(1'b1),
     .valid_m(valid_m),
     .PCPlus4_m(PCPlus4_m),
     .ALUResult_m(ALUResult_m),
@@ -349,11 +415,17 @@ mux UIMux(
 
 
   // assigning signals that don't have an input.
+  assign hazard = hazard1 | hazard2;
   assign rs1 = instr_d[19:15];
   assign rs2 = instr_d[24:20];
   assign Rd_d = instr_d[11:7];
   assign read_addr = PC_f[11:0];
+  assign en_f = en_d;
+  assign en_d = en_e;
+  assign en_e = !hazard&en_m;
+  //assign en_m = !cpu_stall_o;
+  //assign en_m = 1'b1;
   //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)
-
+  assign rst_n = (!PCSrc_e&!rst);
 
 endmodule

@@ -1,4 +1,8 @@
-module mem_top #(parameter AW = 12) (
+module mem_top #(
+    parameter AW = 12, 
+    parameter SETS = 32,
+    parameter CACHE_LINE_SIZE_MULT_POW2 = 1
+) (
     input   wire logic              cpu_clock_i,
 
     // CPU interface in (note does not include bottom two bits of address)
@@ -41,4 +45,5 @@ wire logic [3:0]        wb_sel_o;
     wb_sel_o);
 
     wb_mem memory (cpu_clock_i, 1'b0, wb_cyc_o, wb_stb_o, wb_we_o, wb_adr_o, wb_dat_o, wb_sel_o, wb_stall_i, wb_ack_i, wb_dat_i, wb_err_i);
+
 endmodule

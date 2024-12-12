@@ -1,12 +1,12 @@
 module hazard_unit(
     input wire [4:0] execute_reg,
-    
+   
     input wire valid_e,
     input wire valid_m,
     input wire load_m,
     input wire valid_w,
 
-    input wire [4:0]  dest_m,
+   input wire [4:0]  dest_m,
     input wire [4:0] dest_w,
 
     input wire [31:0] data_m,
@@ -14,7 +14,8 @@ module hazard_unit(
 
     output logic forward,
     output logic hazard,
-    output logic [31:0] data
+
+  output logic [31:0] data
 );
     always_comb begin
         if(valid_e) begin
