@@ -29,15 +29,19 @@ The implementation uses a simple case statement to handle each instruction type 
 
 ## Sign Extension Diagram
 
+Below is the diagram for the Sign Extension module:
+
+![](statements/images/sign_extend.png)
+
 ## Sign Extension Code Example
 
 Below is the code example for the Sign Extension logic:
-![sign extension](images/sign_extend.png)
+![[Pasted image 20241212050652.png]]
 
 ## control unit
 Graph reference to
 
-![[statements/images/graph for cpu.png]]
+![[Pasted image 20241212050006.png]]
 
 #### Signals:
 
@@ -81,28 +85,28 @@ For the first 8 output signals , we just use a simple case statement to handle t
 
 For Imm and not imm(for example ADD and ADDI), the only difference is the Alusrc is 0 or 1.
 
-![[past statements/images/imme.png]]
+![[Pasted image 20241212050134.png]]
 
-![[images/not_imme.png]]
+![[Pasted image 20241212050141.png]]
 
 For load word:
 
-![[images/loads.png]]
+![[Pasted image 20241212050157.png]]
 
 For branch:
 
-![[images/BEQ.png]]
+![[Pasted image 20241212050213.png]]
 For store word:
 
-![[images/SW.png]]
+![[Pasted image 20241212050221.png]]
 And LUI, AUIPC，JAL, JALR:
 
-![[images/LUI.png]]
-![[images/jal.png]]
+![[Pasted image 20241212050240.png]]
+![[Pasted image 20241212050252.png]]
 
 I believe the hardest part for control unit is the last 4 output signals and opcodes. To solve them, we need to add four mux to solve it.
 
-![[images/draft.png]]
+![[Pasted image 20241212050305.png]]
 
 - RD1_control is directly at the ALUop1 path, which select path 0 when LUI,AUIPC, JAL, JALR.
 
@@ -114,11 +118,11 @@ I believe the hardest part for control unit is the last 4 output signals and opc
 
 #### We manage these four signals by if statement:
 
-![[images/code1.png]]
+![[Pasted image 20241212050320.png]]
 
 ## Pipelining and hazard unit:
 
-![[images/pipeline_graph.png]]
+![[Pasted image 20241212050329.png]]
 
 Between each cycles there is registers, and we made two signals which is stall and valid.
 
@@ -169,7 +173,7 @@ For the control hazard there is no need to use the hazard unit as we just detect
 
 - Load_m tell the hazard unit if it is performong a load or not.
 
-
-![[images/hazard_graph.png]]
+![文本
+![[Pasted image 20241212050341.png]]
 
 Inside the hazard unit it is just simply compare whether the address of the register is same as the destinations in each stage.
