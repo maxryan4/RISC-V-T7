@@ -6,6 +6,7 @@ module mem_reg_file #(parameter
     input logic                         clk,
     input logic                         rst_n, // flush active low
     input logic                         en, // stall (if set low will stall)
+    input logic                         en_w,
     input logic                         valid_m, // valid for memory stage
 
     input logic [DATA_WIDTH-1:0]        PCPlus4_m,
@@ -23,7 +24,7 @@ module mem_reg_file #(parameter
     output logic [READ_DATA_WIDTH-1:0]  Rd_w
 );
 
-always_ff @(posedge clk or negedge rst_n) begin
+always_ff @(posedge clk) begin
     if (rst_n) begin
         if (en) begin
             if(valid_m) begin
@@ -33,7 +34,11 @@ always_ff @(posedge clk or negedge rst_n) begin
                 RegWrite_w <= RegWrite_m;
                 ResultSrc_w <= ResultSrc_m;
                 Rd_w <= Rd_m;
+            end else begin
+                RegWrite_w <= 1'b0;
             end
+        end else if (en_w) begin
+            RegWrite_w <= 1'b0;
         end
     end
     else begin

@@ -21,9 +21,7 @@ public:
         tfp = std::make_unique<VerilatedVcdC>();
         Verilated::traceEverOn(true);
         top->trace(tfp.get(), 99);
-        tfp->open("waveform.vcd");
 #endif
-        initializeInputs();
     }
 
     void TearDown() override
@@ -34,7 +32,7 @@ public:
 #endif
     }
 
-    virtual void initializeInputs() = 0;
+    virtual void initializeInputs(const std::string&) = 0;
 
 protected:
     std::unique_ptr<Vdut> top;

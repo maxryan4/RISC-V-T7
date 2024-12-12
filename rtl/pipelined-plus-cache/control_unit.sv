@@ -1,13 +1,9 @@
 module control_unit (
-    input wire EQ,
-  /* verilator lint_off UNUSED */ 
     input wire [31:0] instr,
-  /* verilator lint_on UNUSED */ 
     output logic RegWrite,
     output logic [3:0] ALUctrl,
     output logic ALUsrc,
     output logic [2:0] ImmSrc,
-    output logic PCsrc,
     output logic Branch,
     output logic Jump,
     output logic [1:0] destsrc,//resultscr
@@ -16,7 +12,8 @@ module control_unit (
     output logic UI_control,
     output logic RD1_control,
     output logic PC_RD1_control,
-    output logic four_imm_control
+    output logic four_imm_control,
+    output logic mul_sel // used to tell alu_top if it is a mutliplication instruction
 );
     always_comb begin
         if (instr[6:0]==7'b1101111 ||instr[6:0]==7'b1100111) begin
@@ -46,11 +43,17 @@ module control_unit (
                 ALUctrl={instr[30],instr[14:12]};
                 ALUsrc=0;
                 ImmSrc=0;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=0;
                 MemWrite=0;
+                
+                if (instr[25]) begin  // checks to see if last bit of func7 is 1 indicating that it is a mul instruction
+                    mul_sel=1;
+                end 
+                else begin
+                    mul_sel=0;
+                end
             end
             7'b0010011:begin//imme
                 RegWrite=1;
@@ -61,89 +64,88 @@ module control_unit (
                 end
                 ALUsrc=1;
                 ImmSrc=0;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=0;
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b0000011:begin// Loads
                 RegWrite=1;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=0;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=1;
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b1100011:begin//BEQ
                 RegWrite=0;
                 ALUctrl={1'b0,instr[14:12]};
                 ALUsrc=0;
                 ImmSrc=1;
-                PCsrc=EQ;
                 Branch=1;
                 Jump=0;
                 destsrc=0;
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b0100011:begin//SW
                 RegWrite=0;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=2;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=0;
                 MemWrite=1;
+                mul_sel=0;
             end
             7'b0110111:begin//LUI
                 RegWrite=1;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=3;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=0;
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b0010111 :begin//AUIPC
                 RegWrite=1;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=3;
-                PCsrc=0;
                 Branch=0;
                 Jump=0;
                 destsrc=0;
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b1101111  :begin//JAL
-
                 RegWrite=1;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=4;
-                PCsrc=1;
                 Branch=0;
                 Jump=1;
                 destsrc=3; // changed from 0 to 3 so we can write PC+4 to register
                 MemWrite=0;
+                mul_sel=0;
             end
             7'b1100111 :begin//JALR
                 RegWrite=1;
                 ALUctrl=0;
                 ALUsrc=1;
                 ImmSrc=0;
-                PCsrc=1;
                 Branch=0;
                 Jump=1;
                 destsrc=3; // changed from 0 to 3 so we can write PC+4 to register
                 MemWrite=0;
+                mul_sel=0;
             end                        
             default: begin
                 RegWrite=0;
@@ -152,9 +154,9 @@ module control_unit (
                 ImmSrc=0;
                 Branch=0;
                 Jump=0;
-                PCsrc=0;
                 destsrc=0;
                 MemWrite=0;
+                mul_sel=0;
             end
         endcase
     end
