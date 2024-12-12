@@ -1,19 +1,21 @@
 module hazard_unit(
-    input wire [4:0] execute_reg,    
+    input wire [4:0] execute_reg,
+   
     input wire valid_e,
     input wire valid_m,
     input wire load_m,
     input wire valid_w,
 
-    input wire [4:0]  dest_m, // destination memory
-    input wire [4:0] dest_w, // destination write
+   input wire [4:0]  dest_m,
+    input wire [4:0] dest_w,
 
     input wire [31:0] data_m,
     input wire [31:0] data_w,
 
-    output logic forward, // forward determines whether the program will continue or stall 
-    output logic hazard, // hazard is set to 1 in the case that there is a hazard 
-    output logic [31:0] data
+    output logic forward,
+    output logic hazard,
+
+  output logic [31:0] data
 );
     always_comb begin
         if(valid_e) begin

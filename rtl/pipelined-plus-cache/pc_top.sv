@@ -10,7 +10,9 @@ module pc_top #(
     input   logic                   PCaddsrc,
     input   logic [DATA_WIDTH-1:0]  PC_e,
     output  logic [DATA_WIDTH-1:0]  PC,
-    output  logic [DATA_WIDTH-1:0]  inc_PC
+    output  logic [DATA_WIDTH-1:0]  inc_PC,
+    output  logic [DATA_WIDTH-1:0]  branch_target,      // branch prediction target             
+    output  logic                   predict_taken       // branch prediction (1 = predict branch taken)
 );
 
     // internal signals
@@ -53,11 +55,18 @@ module pc_top #(
     );
 
     mux pc_mux (
-        .in0(inc_PC),
+        .in0(branch_predict_PC),
         .in1(branch_PC),
         .sel(PCsrc),
         .out(next_PCX)
     );
+
+    mux branch_predict_mux (
+        .in0(inc_PC),
+        .in1(branch_target),
+        .sel(predict_taken),
+        .out(branch_predict_PC)
+    );
+
     
 endmodule
-
