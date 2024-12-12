@@ -47,13 +47,16 @@ module onebit_dynamic_branch_predictor #(
             end
         end
     end
+
     initial begin
         for (int i = 0; i < BTB_ROWS; i++) begin
-            BTB[i].valid = 1'b0;       // set valid bit of all BTB entry to 0 if rst asserted
+            BTB[i].valid = 1'b0;       // set valid bit of all BTB entry to 0
             BTB[i].pred  = 1'b0;       // assume not taken
         end
     end
+
     logic [3:0] update_index = branch_actual_target[5:2];
+
     always_ff @(posedge clk) begin
     // if instr = cond. jump   or if instr = JAL uncond. jump
       if (mispredict) begin
