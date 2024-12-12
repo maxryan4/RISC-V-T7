@@ -37,7 +37,7 @@ Below is the code example for the Sign Extension logic:
 ## control unit
 Graph reference to
 
-![[statements/images/graph for cpu.png]]
+![](images/graph_for_cpu.png)
 
 #### Signals:
 
@@ -81,28 +81,28 @@ For the first 8 output signals , we just use a simple case statement to handle t
 
 For Imm and not imm(for example ADD and ADDI), the only difference is the Alusrc is 0 or 1.
 
-![[past statements/images/imme.png]]
+![images/imme.png](images/imme.png)
 
-![[images/not_imme.png]]
+![images/not_imme.png](images/not_imme.png)
 
 For load word:
 
-![[images/loads.png]]
+![images/loads.png](images/loads.png)
 
 For branch:
 
-![[images/BEQ.png]]
+![images/BEQ.png](images/BEQ.png)
 For store word:
 
-![[images/SW.png]]
+![images/SW.png](images/SW.png)
 And LUI, AUIPC，JAL, JALR:
 
-![[images/LUI.png]]
-![[images/jal.png]]
+![images/LUI.png](images/LUI.png)
+![images/jal.png](images/jal.png)
 
 I believe the hardest part for control unit is the last 4 output signals and opcodes. To solve them, we need to add four mux to solve it.
 
-![[images/draft.png]]
+![images/draft.png](images/draft.png)
 
 - RD1_control is directly at the ALUop1 path, which select path 0 when LUI,AUIPC, JAL, JALR.
 
@@ -114,11 +114,11 @@ I believe the hardest part for control unit is the last 4 output signals and opc
 
 #### We manage these four signals by if statement:
 
-![[images/code1.png]]
+![images/code1.png](images/code1.png)
 
 ## Pipelining and hazard unit:
 
-![[images/pipeline_graph.png]]
+![images/pipeline_graph.png](images/pipeline_graph.png)
 
 Between each cycles there is registers, and we made two signals which is stall and valid.
 
@@ -170,6 +170,6 @@ For the control hazard there is no need to use the hazard unit as we just detect
 - Load_m tell the hazard unit if it is performong a load or not.
 
 
-![[images/hazard_graph.png]]
+![images/hazard_graph.png](images/hazard_graph.png)
 
 Inside the hazard unit it is just simply compare whether the address of the register is same as the destinations in each stage.
