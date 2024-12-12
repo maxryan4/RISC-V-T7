@@ -1,3 +1,5 @@
+# Group 7  RISC-V 32IM CPU 
+## Table of Contents
 ### Processor 
 #### Single Cycle
 - F1 Program 
@@ -5,12 +7,14 @@
 - Control Unit 
 - ALU 
 - Data Memory 
-#### pipelining
+#### Pipelining
 - Pipeline Programs For Pipelined CPUs
 - Data Cache 
 - Data Cache
 - Others Result Verification
 - Top-Level Top Level File 
+### Quick Summary
+
 ### Individual Statements Personal Statement:
 
 
@@ -61,10 +65,10 @@
 LEGEND :       `x` = full responsibility;  `p` = partial contribution;
 
 
-implemented instruciton:
-full of RV32IM except  FENCE,ECALL,EBREAK,CSR
+### Implemented instruciton:
+Full of RV32IM except  FENCE,ECALL,EBREAK,CSR
 
-Application we done for extra credit:
+### Application we done for extra credit:
 - MUL and DIV instruciton(for division and multiplicaiton and division)
 - PC branch predictor
 - implemented on FPGA
