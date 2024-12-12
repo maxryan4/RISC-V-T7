@@ -16,11 +16,15 @@
 ### Quick Summary
 We finished two CPUs:single circuit and pipelining in purely hardware. We also made a two set associtive cache with write back . For extra credit, we achieved pc dynamic branch and run the programmes on FPGA.
 ### Individual Statements Personal Statement:
+### Command Description
+| commands                      | what does it do                                                                                           |
+| :---------------------------: | :------------------------------------------------------------------------------------------------------:  | 
+|   ./tb/doitf1.sh              | runs the F1 program and outputs the result onto the vbuddy.                                               |                      
+|   ./tb/doitpdf.sh             | runs the PDF program and outputs the result onto the vbuddy.                                              |                      
+|   ./tb/doitpipelined.sh       | runs through all of the pipelining test cases, testing branch prediction, cache and instructions.         |                      
+|   ./tb/doitsinglecycle.sh     | runs through every single cycle test case, testing every instruction that a single cycle cpu can execute. |        
 
-
-| commands | what does it do | remarks |
-| -------- | --------------- | ------- |
-|          |                 |         |
+### Contribution Table
 
 | File Name                     | Ayuub Mohamud | Ziqian Gao | Max Ryan | Alexander Lewis | Mustafa Idris |
 | :---------------------------- | :-----------: | :--------: | :------: | :-------------: | ------------- |
@@ -64,7 +68,7 @@ We finished two CPUs:single circuit and pipelining in purely hardware. We also m
 
 LEGEND :       `x` = full responsibility;  `p` = partial contribution;
 
-
+### evidence
 ### Implemented instruciton:
 Full of RV32IM except  FENCE,ECALL,EBREAK,CSR
 
