@@ -3,7 +3,7 @@
 ## Worked on:
 * [ALU.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/ALU.sv)
 * [register_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/register_file.sv)
-* [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/F1.S)
+* [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/singlecycle/F1.S)
 * [top.sv (pipelined version)](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/top.sv)
 * [fetch_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/fetch_reg_file.sv)
 * [decode_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/decode_reg_file.sv)
@@ -20,10 +20,10 @@
 
 The ALU needed to be able to handle both R and I type instructions as well as determine whether or not to branch.
 
-In order to do this I used bit 6 of func7 and all 3 bits of func3 to form the 4 bit ALU_ctrl signal. 
+In order to do this I used bit 6 of func7 and all 3 bits of func3 to form the 4 bit ALUctrl signal. 
 This is then used to determine which instructions is used and so what the ALU output should be.
-
-The only exception to this is for addi instructions due to the fact that the the imm part of I type instructions overlaps with func7 so for addi there was a chance that it would be intepreted as a sub instruction as an 
+The only exception to this is for addi instructions. 
+Due to the fact that the the imm part of I type instructions overlaps with func7 so for addi there was a chance that it would be intepreted as a sub instruction as so in the control unit if is an addi instruction it sets the func7[5] part of ALUctrl to 0 so that the ALU interprets it correctly.
 
 For branch instructions the type of branch instruction is determined by the func3 part of the instruction.
 So depending on the value of func3 a different comparison is made between the two input operands and if the comparison is true EQ is set high which tells the control unit that it should branch.
@@ -31,11 +31,17 @@ So depending on the value of func3 a different comparison is made between the tw
 
 
 ## Creating the [register_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/register_file.sv) file
+The register file has an ouput a0 which is register a0 so that it can be read by the testbench. 
+For the pipelined version of the register file it is written to on the falling edge of the clock.
 
 
+## Creating [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/singlecycle/F1.S)
+F1.S has 3 main sections.
+Firsly the a0 and a1 are initialised to 0 and s1 is initialised to 8.
 
-## Creating [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/F1.S)
-
+When incrementing a0 a1 is set as a0 shifted left by 1. 
+Then a0 is set as a1 + 1.
+This way it means that a0 appears to just have the next light light up whereas if you just shifted a0 left by 1 and then added 1 for one clock cycle the bottom light would be off.
 
 
 ## Adding pipelining
@@ -51,13 +57,16 @@ Added extra input and output signals from PC_top.sv and control_unit.sv in order
 
 
 ### Top File
-
+Connected the different stages together via the pipelining registers.
 
 ### Pipeline Registers
+The pipeline registers have a reset which is negative edge triggered which can be used to flush the pipelining registers.
+They have an en which can be used to stall the pipeline if it is set low.
+They also have a valid signal which means that the data won't propogate if it isn't valid although the valid signal will still propogate.
 
 
 
-## M-type Instructions
+## RV32M Instructions
 * [ALU_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/ALU_top.sv)
 * [mul.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/mul.sv)
 * [div_sc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_sc.sv)
@@ -65,21 +74,30 @@ Added extra input and output signals from PC_top.sv and control_unit.sv in order
 
 
 ### ALU_top
-Created to unify the R, I and M-type instructions into one module overarching modules with a few submodules.
-
+Created to unify the ALU instructions from the RV32I instruction set with the RV32M instructions into one module overarching modules with a few submodules.
+func3[2] is used to tell if the instruction is a multiply or divide instruction. It is 1 for a divide instruction and 0 for a multiply instruction.
 
 ### Multiplication
-
+For multiplication the instructions are distinguished by func3[1:0].
 
 ### Division
+There are 2 types of division instructions these being DIV and REM and for each of these instructions there is an unsigned version of the instruction.
+DIV instructions return the result of the division rounded down to the nearest integer.
+REM instructions return the remainder of the division.
+These instructions are distinguished by func3[1:0].
 
 #### [Single Cycle Division](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_sc.sv)
+Implemented division in a single cycle.
 Using the system verilog / and % operators causes large blocks of hardware to be synthesised which will drastically lower the maximum clock speed of the CPU.
 
 #### [Multicycle Division](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_mc.sv)
-Implemented divisio
-
-
+Implemented multicyle division which uses 32 cycles to do a single division operation. This means that the clock speed of the CPU won't be affected too much by the division hardware.
+In the divide by 0 case the quotient is the maximum value that can be stored based off of whether it was a signed or unsigned division.
+The remainder will be the value of the quotient as there is no actual meaningful result for the value of the quotient and you can't have a remainder that is larger than the quotient so I set the remainder to the value of the quotient.
+Since division takes 32 cycles to comlete with this implementation the pipeline has to be stalled until the result is ready.
+In order to do the division I used an iterative approach that 
+  
+...
 
 ## What I learned
 
