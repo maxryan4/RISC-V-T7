@@ -10,7 +10,6 @@
 | pc_reg.sv                     |               |            |          |        x        |               |
 | adder.sv                      |               |            |          |        x        |               |
 | instruction_memory.sv         |               |     x      |          |                 | p             |
-| mem_top.sv                    |       x       |            |          |                 |               |
 | load_format.sv                |       x       |            |          |                 | P             |
 | store_format.sv               |       x       |            |          |                 | P             |
 

@@ -10,7 +10,6 @@
 | pc_reg.sv                     |               |            |          |        x        |               |
 | adder.sv                      |               |            |          |        x        |               |
 | instruction_memory.sv         |               |     x      |          |                 | p             |
-| mem_top.sv                    |       x       |            |          |                 |               |
 | load_format.sv                |       x       |            |          |                 | P             |
 | store_format.sv               |       x       |            |          |                 | P             |
 | top.sv (pipeline)             |               |            |    x     |                 | p             |
@@ -21,6 +20,7 @@
 | hazard_unit.sv                |               |     x      |          |                 |               |
 | static_branch_predictor.sv    |               |            |          |        x        |               |
 | dynamic_branch_predictor      |               |            |          |        x        |               |
+| mem_top.sv                    |       x       |            |          |                 |               |
 | wb_mem.sv                     |       x       |            |          |                 |               |
 | direct_mapped_cache_wb.sv     |       x       |            |          |                 |               |
 | direct_mapped_cache_wt.sv     |       x       |            |          |                 |               |
