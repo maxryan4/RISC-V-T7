@@ -10,11 +10,16 @@ module fetch_reg_file #(
     input logic [DATA_WIDTH-1:0]        PC_f,
     input logic [DATA_WIDTH-1:0]        PCPlus4_f,
 
-    output logic                       valid_d,
+    input logic                         predict_taken_f,
+    input logic [DATA_WIDTH-1:0]        branch_target_f,
+
+    output logic                        valid_d,
 
     output logic [DATA_WIDTH-1:0]       read_data_d,
     output logic [DATA_WIDTH-1:0]       PC_d,
-    output logic [DATA_WIDTH-1:0]       PCPlus4_d
+    output logic [DATA_WIDTH-1:0]       PCPlus4_d,
+    output logic                        predict_taken_d,
+    output logic [DATA_WIDTH-1:0]       branch_target_d
 );
 
 always_ff @(posedge clk) begin
@@ -25,6 +30,8 @@ always_ff @(posedge clk) begin
             PCPlus4_d <= PCPlus4_f;
             valid_d <= 1'b1;
             //valid_d <= valid_f;
+            predict_taken_d <= predict_taken_f;
+            branch_target_d <= branch_target_f;
         end
     end
     else begin
@@ -32,6 +39,8 @@ always_ff @(posedge clk) begin
         PC_d <= 32'b0;
         PCPlus4_d <= 32'b0;
         valid_d <= 1'b0;
+        predict_taken_d <= 1'b0;
+        branch_target_d <= 32'b0;
     end
 end
 

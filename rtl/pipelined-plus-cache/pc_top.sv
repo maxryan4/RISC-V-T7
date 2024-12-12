@@ -65,7 +65,11 @@ module pc_top #(
     mux branch_predict_mux (
         .in0(inc_PC),
         .in1(branch_target),
+<<<<<<< HEAD
+        .sel(predict_taken),
+=======
         .sel(1'b0),
+>>>>>>> a05180662a4ba8b7c4abc03618e381f32233802d
         .out(branch_predict_PC)
     );
 

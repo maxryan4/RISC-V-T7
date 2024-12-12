@@ -35,6 +35,9 @@ module decode_reg_file #(
     input logic [READ_DATA_WIDTH-1:0]   RS2_d,
     input logic                         mul_sel_d,
 
+    input logic                         predict_taken_d,
+    input logic [DATA_WIDTH-1:0]        branch_target_d,
+
     output logic                        valid_e,
 
     output logic [DATA_WIDTH-1:0]       PC_e,
@@ -58,7 +61,10 @@ module decode_reg_file #(
     output logic [MEM_CTRL_WIDTH-1:0]   MemCtrl_e,
     output logic                        RD1_control_e,
     output logic                        PC_RD1_control_e,
-    output logic                        mul_sel_e
+    output logic                        mul_sel_e,
+    
+    output logic                        predict_taken_e,
+    output logic [DATA_WIDTH-1:0]       branch_target_e
 );
 
 always_ff @(posedge clk) begin
@@ -86,6 +92,8 @@ always_ff @(posedge clk) begin
                 PC_RD1_control_e <= PC_RD1_control_d;
                 mul_sel_e <= mul_sel_d;
                 instr_e <= instr_d;
+                predict_taken_e <= predict_taken_d;
+                branch_target_e <= branch_target_d;
             end
             valid_e <= valid_d;
         end
@@ -111,6 +119,8 @@ always_ff @(posedge clk) begin
         valid_e <= 1'b0;
         mul_sel_e <= 1'b0;
         instr_e <= 32'b0;
+        predict_taken_e <= 1'b0;
+        branch_target_e <= 32'b0;
     end
 end
 
