@@ -20,6 +20,7 @@ module pc_top #(
     // logic [DATA_WIDTH-1:0] inc_PC;
     logic [DATA_WIDTH-1:0] next_PCX;
     logic [DATA_WIDTH-1:0] next_PC;
+    logic [DATA_WIDTH-1:0] branch_predict_PC;
     // instantiating modules
 
     mux mux_st (
@@ -64,7 +65,7 @@ module pc_top #(
     mux branch_predict_mux (
         .in0(inc_PC),
         .in1(branch_target),
-        .sel(predict_taken),
+        .sel(1'b0),
         .out(branch_predict_PC)
     );
 

@@ -15,6 +15,7 @@ module top #(
   logic [DATA_WIDTH-1:0] PC_e;
   logic [DATA_WIDTH-1:0] instr_f;
   logic [DATA_WIDTH-1:0] instr_d;
+  logic [DATA_WIDTH-1:0] instr_e;
   logic [DATA_WIDTH-1:0] PCPlus4_f;
   logic [DATA_WIDTH-1:0] PCPlus4_d;
   logic [DATA_WIDTH-1:0] PCPlus4_e;
@@ -93,6 +94,10 @@ module top #(
   logic [DATA_WIDTH-1:0] RS2_fdata;
   logic [DATA_WIDTH-1:0] RD1_forwarded;
   logic [DATA_WIDTH-1:0] RD2_forwarded;
+  logic mul_sel_d;
+  logic mul_sel_e;
+  logic div_ready;
+  logic stall_div;
   
   wire en_f, en_d, en_e, en_m;
   /* verilator lint_on UNUSED */ 
@@ -167,6 +172,7 @@ module top #(
 
   // ------ Pipelining Hazard Unit ------ 
   wire load_m = ResultSrc_m==2'd1;
+
   hazard_unit hazard_unit1(
     .execute_reg(RS1_e),
     .load_m(load_m),
@@ -215,7 +221,8 @@ module top #(
     .UI_control(UI_control),
     .RD1_control(RD1_control_d),
     .PC_RD1_control(PC_RD1_control_d),
-    .four_imm_control(four_imm_control)
+    .four_imm_control(four_imm_control),
+    .mul_sel(mul_sel_d)
   );
 
   wire [31:0] Result_w;
@@ -273,6 +280,8 @@ mux UIMux(
     .PC_RD1_control_d(PC_RD1_control_d),
     .RS1_d(instr_d[19:15]),
     .RS2_d(instr_d[24:20]),
+    .mul_sel_d(mul_sel_d),
+    .instr_d(instr_d),
 
     .RS1_e(RS1_e),
     .RS2_e(RS2_e),
@@ -293,7 +302,9 @@ mux UIMux(
     .UI_OUT_e(UI_out_e),
     .MemCtrl_e(MemCtrl_e),
     .RD1_control_e(RD1_control_e),
-    .PC_RD1_control_e(PC_RD1_control_e)
+    .PC_RD1_control_e(PC_RD1_control_e),
+    .mul_sel_e(mul_sel_e),
+    .instr_e(instr_e)
   );
 
 
@@ -313,20 +324,26 @@ mux UIMux(
       .out(ALUop2)
   );
 
-  ALU alu (
+  ALU_top ALU_top (
+    .clk(clk),
     .ALUop1(ALUop1),
     .ALUop2(ALUop2),
     .ALUctrl(ALUControl_e),
     .ALUout(ALUResult_e),
-    .EQ(EQ)
+    .EQ(EQ),
+    .mul_sel(mul_sel_e),
+    .div_ready(div_ready)
   );
+
+  // check to see if should stall for division
+  always_comb begin 
+    stall_div = (div_ready==0)&&(instr_e[25]==1)&&(instr_e[14]==1)&&(instr_e[6:0]==7'b0110011);
+  end
 
   always_comb begin
     PCSrc_e = (Jump_e || (Branch_e && EQ))&valid_e;
     WriteData_e = RD2_forwarded;
   end
-
-
 
 
   // ------ Pipelining execute to memory stage ------
@@ -422,7 +439,7 @@ mux UIMux(
   assign read_addr = PC_f[11:0];
   assign en_f = en_d;
   assign en_d = en_e;
-  assign en_e = !hazard&en_m;
+  assign en_e = !hazard&en_m & !stall_div;
   //assign en_m = !cpu_stall_o;
   //assign en_m = 1'b1;
   //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)

@@ -2,7 +2,6 @@ module div_mc #( // takes 32 cycles to do a division to reduce impact on clock s
     DATA_WIDTH = 32
 ) (
     input  logic clk,
-    input  logic rst,
     input  logic start,
     input  logic [DATA_WIDTH-1:0] dividend, // number to be divided by
     input  logic [DATA_WIDTH-1:0] divisor, // number to divide by
@@ -23,23 +22,14 @@ logic sign_result;
 logic busy; // 1 if division is in progress
 
 
-always_ff @(posedge clk or posedge rst) begin
-    if (rst) begin
-        dividend_reg <= 32'b0;
-        divisor_reg  <= 32'b0;
-        quotient_reg <= 32'b0;
-        remainder_reg <= 32'b0;
-        count <= 6'b0;
-        ready <= 1'b0;
-        busy <= 1'b0;
-    end 
-    else if (start && !busy) begin
+always_ff @(posedge clk) begin
+    if (start && !busy) begin
         if (divisor == 32'b0) begin // handle division by zero
             ready <= 1'b1;
             busy <= 1'b0;
             quotient <= signed_op ? 32'hFFFFFFFF : 32'h7FFFFFFF; // Max value for error in both signed and unsigned case
             remainder <= dividend; // Remainder is the dividend in case of division by zero as there is no meaningful result
-        end 
+        end
         else begin
             ready <= 1'b0;
             busy <= 1'b1;

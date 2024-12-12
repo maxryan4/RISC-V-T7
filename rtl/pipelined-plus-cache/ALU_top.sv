@@ -2,7 +2,6 @@ module ALU_top #(
     DATA_WIDTH = 32
 ) (
     input logic clk,
-    input logic rst,
     input logic [DATA_WIDTH-1:0] ALUop1,
     input logic [DATA_WIDTH-1:0] ALUop2,
     input logic [3:0] ALUctrl, // {func7[5],func3[2:0]}
@@ -44,7 +43,6 @@ mul mul (
 
 div_mc div_mc (
     .clk(clk),
-    .rst(rst),
     .start(ALUctrl[2]), // MSB of func3 determines if it is a div or not
     .dividend(ALUop1),
     .divisor(ALUop2),
