@@ -14,7 +14,7 @@
 - Others Result Verification
 - Top-Level Top Level File 
 ### Quick Summary
-
+We finished two CPUs:single circuit and pipelining in purely hardware. We also made a two set associtive cache with write back . For extra credit, we achieved pc dynamic branch and run the programmes on FPGA.
 ### Individual Statements Personal Statement:
 
 
