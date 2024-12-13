@@ -1,6 +1,5 @@
 module hazard_unit(
     input wire [4:0] execute_reg,
-   
     input wire valid_e,
     input wire valid_m,
     input wire load_m,

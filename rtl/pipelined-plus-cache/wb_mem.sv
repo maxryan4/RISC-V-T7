@@ -32,6 +32,7 @@ module wb_mem #(parameter WB_AW = 18, parameter WB_DW = 32, parameter FILE_LOAD 
                 RAM[i] = '0;
             end
         end
+
     end
 
     

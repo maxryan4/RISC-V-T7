@@ -8,10 +8,9 @@ module static_branch_predictor #(
     output logic predict_taken              // branch prediction (1 = predict branch taken)
 
 );
-    logic [DATA_WIDTH-1:0] branch_target;   // target address of branch
 
     always_comb begin
-        case (instr[6:0])
+        case (RD[6:0])
             // Branch Instructions
             7'b1100011: branch_target = PC_f + {{20{RD[31]}},RD[7],RD[30:25],RD[11:8],1'b0};
             

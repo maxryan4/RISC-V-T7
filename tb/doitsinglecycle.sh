@@ -44,7 +44,7 @@ for file in "${files[@]}"; do
                 -o Vdut \
                 -LDFLAGS "-lgtest -lgtest_main -lpthread" \
 
-     
+      
     
 
         # Build C++ project with automatically generated Makefile
