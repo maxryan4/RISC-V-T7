@@ -39,6 +39,8 @@ For the pipelined version of the register file it is written to on the falling e
 F1.S has 3 main sections.
 Firsly the a0 and a1 are initialised to 0 and s1 is initialised to 8.
 
+TO DO!!!!!!!!!!!!!!!!!
+
 When incrementing a0 a1 is set as a0 shifted left by 1. 
 Then a0 is set as a1 + 1.
 This way it means that a0 appears to just have the next light light up whereas if you just shifted a0 left by 1 and then added 1 for one clock cycle the bottom light would be off.
@@ -95,14 +97,39 @@ Implemented multicyle division which uses 32 cycles to do a single division oper
 In the divide by 0 case the quotient is the maximum value that can be stored based off of whether it was a signed or unsigned division.
 The remainder will be the value of the quotient as there is no actual meaningful result for the value of the quotient and you can't have a remainder that is larger than the quotient so I set the remainder to the value of the quotient.
 Since division takes 32 cycles to comlete with this implementation the pipeline has to be stalled until the result is ready.
-In order to do the division I used an iterative approach that 
-  
-...
+
+In order to do the division I used an iterative approach.
+
+The most significant bit of dividend_reg is shifted into the lsb of remainder_reg.
+This essentially adds the next digit of the dividend to the remainder a bit like bringing down the digit in long division.
+Then the dividend_reg is shifted left by 1.
+This effectively removes the already processed MSB and shifts the next bit up for processing. 
+```system verilog
+remainder_reg <= {remainder_reg[30:0], dividend_reg[31]};
+dividend_reg <= {dividend_reg[30:0], 1'b0};
+```
+
+Then if remainder_reg is larger than divisor_reg remainder_reg is set to remainder_reg - divisor_reg.
+This is just like in normal long division.
+Then the quotient is shifted left by 1 with its LSB being set to 1.
+Otherwise the quotient_reg is shifted left.
+This is done to build the quotient correctly based off of whether the divisor fitted into remainder_reg.
+```system verilog
+if (remainder_reg >= divisor_reg) begin
+    remainder_reg <= remainder_reg - divisor_reg;
+    quotient_reg <= {quotient_reg[30:0], 1'b1};
+end else begin
+    quotient_reg <= {quotient_reg[30:0], 1'b0};
+end
+```
+
+These 2 blocks of code are repeated 32 times and this will give the correct division result.
 
 ## What I learned
 
 From doing the pipelined version of the top file I gained a very thorough understanding of how the whole CPU works.
 
+TO DO!!!!!!!!!!!!!!!!
 
 
 ## If I had more time
@@ -112,3 +139,4 @@ I would also look at doing out of order execution and adding floating point arit
 
 
 ## Commits
+ADD TO EACH SECTION!!!!!
