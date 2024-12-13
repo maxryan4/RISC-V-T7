@@ -38,8 +38,21 @@ This second major commit was a rewrite of the data module for the single cycle C
 ### Add data caches (#14)
 Commit link [here](https://github.com/maxryan4/RISC-V-T7/commit/016f312dd303449d2a6fb6c382cb7311dcc0c273)
 
-In this commit I add 4 types of data caches.
+In this commit I added the aforementioned 4 types of caches, write-back/direct, write-back/two-way, write-through/direct, write-through/two-way.
 
+I formalised the interface between the CPU and the cache as consisting of the following signals:
+```Verilog
+input   wire logic [AW+1:0]     cpu_addr_i,
+input   wire logic [31:0]       cpu_data_i,
+input   wire logic [2:0]        cpu_mem_ctrl_i,
+input   wire logic              cpu_mem_write_i,
+input   wire logic              cpu_valid_i,
+output       logic [31:0]       cpu_data_o,
+output       logic              cpu_stall_o
+```
+The ```cpu_valid_i``` signal is high whenever the CPU makes a memory request, with ```cpu_addr_i``` carrying the address of the operation, ```cpu_data_i``` carrying the data for stores, ```cpu_mem_ctrl_i``` carrying the memory control signals for size and signedness and ```cpu_mem_write``` goes high whenever a store request is being made.
+
+```cpu_data_o``` carries the formatted data for loads, alongside ```cpu_stall_o``` which goes high when a memory request stalls the CPU, and low otherwise.
 
 ## Self-Reflections
 ### What I've learnt from this project
