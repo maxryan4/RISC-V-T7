@@ -9,6 +9,8 @@ module onebit_dynamic_branch_predictor #(
     input logic                     mispredict,
     input logic                     branch_actual_taken,    // checks if branch is actually taken
     input logic [DATA_WIDTH-1:0]    branch_actual_target,
+    input logic                     type_j,
+    input logic [DATA_WIDTH-1:0]    branch_pc,
 
     output logic                    predict_taken_f,
     output logic [DATA_WIDTH-1:0]   branch_target_f
@@ -36,7 +38,7 @@ module onebit_dynamic_branch_predictor #(
 
     always_comb begin
         predict_taken_f = 1'b0;           // default values
-        branch_target_f = PC_f;           // default values
+        branch_target_f = '0;           // default values
 
         if ((RD_f[6:0] == 7'b1100011) || (RD_f[6:0] == 7'b1101111)) begin           // check if instr is a jump
             if (BTB[index_f].valid && (BTB[index_f].tag == tag_f)) begin        // check if entry valid and tag matches
@@ -55,23 +57,17 @@ module onebit_dynamic_branch_predictor #(
         end
     end
 
-    logic [3:0] update_index = branch_actual_target[5:2];
+    logic [3:0] update_index = branch_pc[5:2];
+    logic [DATA_WIDTH-7:0] tag = branch_pc[DATA_WIDTH-1:6];
 
     always_ff @(posedge clk) begin
     // if instr = cond. jump   or if instr = JAL uncond. jump
       if (mispredict) begin
           BTB[update_index].valid  <= 1'b1;       
-          BTB[update_index].tag    <= branch_actual_target[DATA_WIDTH-1:6];   // update tag
+          BTB[update_index].tag    <= tag;   // update tag
           BTB[update_index].target <= branch_actual_target;                   // update target PC
-          BTB[update_index].uncond   <= (RD_f[6:0] == 7'b1101111);              // JAL uncond. jump
+          BTB[update_index].uncond   <= type_j;              // JAL uncond. jump
           BTB[update_index].pred <= branch_actual_taken;
-      end
-
-      // this updates 1 bit predictor
-      if (branch_actual_taken) begin          // if branch is actually taken
-          BTB[update_index].pred <= 1'b1;     // set pred to T (1)
-      end else begin                          // if branch is not actually taken
-          BTB[update_index].pred <= 1'b0;     // set pred to N (0)
       end
     end
 

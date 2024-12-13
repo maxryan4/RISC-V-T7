@@ -34,23 +34,13 @@ mul mul (
     .result(mul_result)
 );
 
-div_mc div_mc (
-    .clk(clk),
-    .start(ALUctrl[2]), // MSB of func3 determines if it is a div or not
-    .dividend(ALUop1),
-    .divisor(ALUop2),
-    .signed_op(ALUctrl[0]), // func3[0] determines if it is a signed division (1 if signed, 0 if not signed)
-    .quotient(quotient),
-    .remainder(remainder),
-    .ready(div_ready) // 1 if division is ready
+div_sc div_sc (
+    .op1(ALUop1),
+    .op2(ALUop2),
+    .div_ctrl(ALUctrl[2:0]),
+    .result(div_result)
 );
 
-mux div_or_rem(
-    .in0(quotient),
-    .in1(remainder),
-    .sel(ALUctrl[1]), // func3[1] determines if it is a div or rem instruction
-    .out(div_result)
-);
 
 mux mul_or_div (
     .in0(mul_result),

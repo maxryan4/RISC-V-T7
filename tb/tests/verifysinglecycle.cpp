@@ -3,10 +3,10 @@
 
 #define CYCLES 10000
 
+
 // instruction testing
 TEST_F(CpuTestbench, BaseProgramTest)
 {
-  // initializes input registers and open waveform file
   initializeInputs("program");
   // method which compiles an asm file and stores the result in tests directory
   compile("asm/other/program.S");
@@ -73,23 +73,6 @@ TEST_F(CpuTestbench, LoadByteTesting)
     EXPECT_EQ(top->a0, 4);
 }
 
-TEST_F(CpuTestbench, DivTest)
-{
-    initializeInputs("divtest");
-    compile("asm/instruction_tests/divtest.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 2);
-}
-TEST_F(CpuTestbench, MulTest)
-{
-    initializeInputs("multest");
-    compile("asm/instruction_tests/multest.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 50);
-}
-
 // The 5 required tests
 TEST_F(CpuTestbench, AddiBneTest)
 {
@@ -125,89 +108,16 @@ TEST_F(CpuTestbench, JalrTest)
 }
 
 
+/* this test is not needed, as it is performed in pipelining
 TEST_F(CpuTestbench, PdfTest)
 {
-    initializeInputs("pdftest");
+    initializeInputs("pdfteset");
     compile("asm/required_tests/5_pdf.s");
 
-    runSimulation(500000);
+    runSimulation(CYCLES);
     EXPECT_EQ(top->a0, 15363);
 }
-
-
-
-// Pipeline specific testing
-TEST_F(CpuTestbench, AddTest1)
-{
-    initializeInputs("addtest_1");
-    compile("asm/pipeline_tests/addtest_1.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 80);
-}
-
-TEST_F(CpuTestbench, AddTest2)
-{
-    initializeInputs("addtest_2");
-    compile("asm/pipeline_tests/addtest_2.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 10);
-}
-
-
-
-TEST_F(CpuTestbench, BranchPrediction1)
-{
-    initializeInputs("branchprediction_1");
-    compile("asm/pipeline_tests/branchprediction_1.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 60);
-
-}
-
-
-
-TEST_F(CpuTestbench, BranchPrediction2)
-{
-    initializeInputs("branchprediction_2");
-    compile("asm/pipeline_tests/branchprediction_2.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 10);
-}
-
-TEST_F(CpuTestbench, BranchPrediction3)
-{
-    initializeInputs("branchprediction_3");
-    compile("asm/pipeline_tests/branchprediction_3.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 22);
-}
-TEST_F(CpuTestbench, LoadHazardTest)
-{
-    initializeInputs("loadhazardtest");
-    compile("asm/pipeline_tests/loadhazardtest.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 50);
-}
-
-
-
-
-TEST_F(CpuTestbench, StoreHazardTest)
-{
-    initializeInputs("storehazardtest");
-    compile("asm/pipeline_tests/storehazardtest.S");
-
-    runSimulation(CYCLES);
-    EXPECT_EQ(top->a0, 20);
-}
-
-
+*/
 
 
 int main(int argc, char **argv)
@@ -216,3 +126,4 @@ int main(int argc, char **argv)
     auto res = RUN_ALL_TESTS();
     return res;
 }
+

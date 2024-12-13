@@ -11,11 +11,10 @@ module decode_reg_file #(
     input logic                         rst_n, // flush active low
     input logic                         en, // stall (if set low will stall)
     input logic                         valid_d, // valid for decode
+    input logic                         en_e,
 
     input logic [DATA_WIDTH-1:0]        PC_d,
     input logic [DATA_WIDTH-1:0]        PCPlus4_d,
-    input logic [DATA_WIDTH-1:0]        RD1_d,
-    input logic [DATA_WIDTH-1:0]        RD2_d,
     input logic [READ_DATA_WIDTH-1:0]   Rd_d,
     input logic [DATA_WIDTH-1:0]        UI_OUT_d,
     input logic [DATA_WIDTH-1:0]        ImmOp_d,
@@ -42,8 +41,6 @@ module decode_reg_file #(
 
     output logic [DATA_WIDTH-1:0]       PC_e,
     output logic [DATA_WIDTH-1:0]       PCPlus4_e,
-    output logic [DATA_WIDTH-1:0]       RD1_e,
-    output logic [DATA_WIDTH-1:0]       RD2_e,
     output logic [READ_DATA_WIDTH-1:0]  Rd_e,
     output logic [READ_DATA_WIDTH-1:0]  RS1_e,
     output logic [READ_DATA_WIDTH-1:0]  RS2_e,
@@ -73,8 +70,6 @@ always_ff @(posedge clk) begin
             if (valid_d) begin
                 PC_e <= PC_d;
                 PCPlus4_e <= PCPlus4_d;
-                RD1_e <= RD1_d;
-                RD2_e <= RD2_d;
                 RS1_e <= RS1_d;
                 RS2_e <= RS2_d;
                 Rd_e <= Rd_d;
@@ -94,15 +89,15 @@ always_ff @(posedge clk) begin
                 instr_e <= instr_d;
                 predict_taken_e <= predict_taken_d;
                 branch_target_e <= branch_target_d;
-            end
+            end 
             valid_e <= valid_d;
-        end
+          end else if (en_e) begin
+            valid_e <= 1'b0; 
+          end
     end
     else begin
         PC_e <= 32'b0;
         PCPlus4_e <= 32'b0;
-        RD1_e <= 32'b0;
-        RD2_e <= 32'b0;
         Rd_e <= 5'b0;
         ImmOp_e <= 32'b0;
         RegWrite_e <= 1'b0;

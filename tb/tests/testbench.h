@@ -2,6 +2,7 @@
 
 #include "base_testbench.h"
 
+unsigned int ticks = 0;
 /**
  * Class only exists because top->clk is not always accessible in the testbench,
  * and will otherwise not compile.

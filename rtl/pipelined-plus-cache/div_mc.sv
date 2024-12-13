@@ -21,23 +21,9 @@ logic sign_dividend;
 logic sign_result;
 logic busy; // 1 if division is in progress
 
-// Initialize all values
-initial begin
-    busy = 1'b0;
-    ready = 1'b0;
-    dividend_reg = 32'b0;
-    divisor_reg = 32'b0;
-    quotient_reg = 32'b0;
-    remainder_reg = 32'b0;
-    count = 6'b0;
-    sign_dividend = 1'b0;
-    sign_result = 1'b0;
-end
 
 always_ff @(posedge clk) begin
     if (start && !busy) begin
-        remainder_reg <= 32'b0;
-        quotient_reg <= 32'b0;
         if (divisor == 32'b0) begin // handle division by zero
             ready <= 1'b1;
             busy <= 1'b0;
@@ -74,30 +60,33 @@ always_ff @(posedge clk) begin
         end 
     end
     else if (busy) begin
-        if (count < DATA_WIDTH) begin // Division in progress
+        if (count < 32) begin // division is in progress
             remainder_reg <= {remainder_reg[DATA_WIDTH-2:0], dividend_reg[DATA_WIDTH-1]};
             dividend_reg <= {dividend_reg[DATA_WIDTH-2:0], 1'b0};
             
             if (remainder_reg >= divisor_reg) begin
                 remainder_reg <= remainder_reg - divisor_reg;
                 quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b1};
-            end else begin
+            end 
+            else begin
                 quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b0};
             end
+
             count <= count + 1;
-        end 
-        else begin // Division complete
-            ready <= 1'b1;
+        end
+        else begin // division is complete
             busy <= 1'b0;
-        
+            ready <= 1'b1;
+            
             if (signed_op) begin
                 quotient <= sign_result ? -quotient_reg : quotient_reg;
                 remainder <= sign_dividend ? -remainder_reg : remainder_reg;
-            end else begin
+            end 
+            else begin
                 quotient <= quotient_reg;
                 remainder <= remainder_reg;
-            end                      
-        end        
+            end
+        end
     end
 end
 endmodule

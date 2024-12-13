@@ -1,9 +1,9 @@
 module mem_top #(
-    parameter AW = 12, 
+    parameter AW = 18, 
     parameter SETS = 32,
     parameter CACHE_LINE_SIZE_MULT_POW2 = 1,
-    parameter FILE_LOAD = 0,
-    parameter FILE = ""
+    parameter FILE_LOAD = 1,
+    parameter FILE = "../rtl/memory/gaussian.mem"
 ) (
     input   wire logic              cpu_clock_i,
 

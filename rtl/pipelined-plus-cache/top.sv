@@ -77,7 +77,13 @@ module top #(
   logic MemWrite_m;
   logic [4:0] Rd_m;
   logic [3:0] ALUControl_e;
-
+  logic [31:0] branch_target;
+  logic        predict_taken;
+  logic [31:0] branch_target_d;
+  logic        predict_taken_d;
+  logic [31:0] branch_target_e;
+  logic        predict_taken_e;
+  logic [31:0] branch_pc_e;
   logic en;
   logic rst_n;
   logic valid_f;
@@ -101,6 +107,7 @@ module top #(
   logic stall_div;
   
   wire en_f, en_d, en_e, en_m;
+  wire branch_actual_taken = valid_e&((Branch_e&EQ)|Jump_e);
   /* verilator lint_on UNUSED */ 
 
 
@@ -123,7 +130,14 @@ module top #(
     .ImmOp(ImmOp_e),
     .PC(PC_f),
     .inc_PC(PCPlus4_f),
-    .PC_e(PC_e)
+    .PC_e(PC_e),
+    .instr_f(instr_f),
+    .branch_actual_taken(branch_actual_taken),
+    .type_j(Jump_e),
+    .branch_target(branch_target),
+    .predict_taken(predict_taken),
+    .branch_pc_e(branch_pc_e),
+    .PC_P4(PCPlus4_e)
   );
 
   instruction_memory instruction_memory (
@@ -145,7 +159,11 @@ module top #(
     .valid_d(valid_d),
     .PC_d(PC_d),
     .PCPlus4_f(PCPlus4_f),
-    .PCPlus4_d(PCPlus4_d)
+    .PCPlus4_d(PCPlus4_d),
+    .branch_target_f(branch_target),
+    .predict_taken_f(predict_taken),
+    .branch_target_d(branch_target_d),
+    .predict_taken_d(predict_taken_d)
   );
 
   /*
@@ -172,7 +190,7 @@ module top #(
   );
 
   // ------ Pipelining Hazard Unit ------ 
-  wire load_m = ResultSrc_m==2'd1 || stall_div;
+  wire load_m = ResultSrc_m==2'd1;
 
   hazard_unit hazard_unit1(
     .execute_reg(RS1_e),
@@ -235,8 +253,8 @@ module top #(
     .AD3(Rd_w),
     .WE3(RegWrite_w),
     .WD3(Result_w),
-    .RD1(RD1_d),
-    .RD2(RD2_d),
+    .RD1(RD1_e),
+    .RD2(RD2_e),
     .a0(a0)
   );
 
@@ -260,12 +278,11 @@ mux UIMux(
     .clk(clk),
     .rst_n(rst_n),
     .en(en_d),
+    .en_e(en_e),
     .valid_d(valid_d),
 
     .PC_d(PC_d),
     .PCPlus4_d(PCPlus4_d),
-    .RD1_d(RD1_d),
-    .RD2_d(RD2_d),
     .Rd_d(Rd_d),
     .ImmOp_d(ImmOp_d),
     .RegWrite_d(RegWrite_d),
@@ -283,14 +300,16 @@ mux UIMux(
     .RS2_d(instr_d[24:20]),
     .mul_sel_d(mul_sel_d),
     .instr_d(instr_d),
+    .branch_target_d(branch_target_d),
+    .predict_taken_d(predict_taken_d),
+    .branch_target_e(branch_target_e),
+    .predict_taken_e(predict_taken_e),
 
     .RS1_e(RS1_e),
     .RS2_e(RS2_e),
     .valid_e(valid_e),
     .PC_e(PC_e),
     .PCPlus4_e(PCPlus4_e),
-    .RD1_e(RD1_e),
-    .RD2_e(RD2_e),
     .Rd_e(Rd_e),
     .ImmOp_e(ImmOp_e),
     .RegWrite_e(RegWrite_e),
@@ -338,11 +357,11 @@ mux UIMux(
 
   // check to see if should stall for division
   always_comb begin 
-    stall_div = (div_ready==0)&&(instr_e[25]==1)&&(instr_e[14]==1)&&(instr_e[6:0]==7'b0110011);
+    stall_div = 1'b0;
   end
 
   always_comb begin
-    PCSrc_e = (Jump_e || (Branch_e && EQ))&valid_e;
+    PCSrc_e = ((Jump_e&!predict_taken_e || (Branch_e && (EQ^predict_taken_e))))&valid_e;
     WriteData_e = RD2_forwarded;
   end
 
@@ -379,18 +398,11 @@ mux UIMux(
 
   // ------ Memory stage ------
 
-  //data_memory data_memory (
-  //  .clk(clk),
-  //  .mem_write(MemWrite_m),
-  //  .mem_ctrl(MemCtrl_m),
-  //  .data_i(WriteData_m),
-  //  .addr_i(ALUResult_m[11:0]),
-  //  .data_o(ReadData_m)
-  //);
+  
   wire mem_op_valid = (load_m|MemWrite_m)&valid_m;
-  mem_top #(10, 64, 0) data_memory_cache (
+  mem_top #(18, 64, 0) data_memory_cache (
     .cpu_clock_i(clk),
-    .cpu_addr_i(ALUResult_m[11:0]),
+    .cpu_addr_i(ALUResult_m[19:0]),
     .cpu_data_i(WriteData_m),
     .cpu_mem_ctrl_i(MemCtrl_m),
     .cpu_mem_write_i(MemWrite_m),
@@ -434,17 +446,16 @@ mux UIMux(
 
   // assigning signals that don't have an input.
   assign hazard = hazard1 | hazard2;
-  assign rs1 = instr_d[19:15];
-  assign rs2 = instr_d[24:20];
+  assign rs1 = RS1_e;
+  assign rs2 = RS2_e;
   assign Rd_d = instr_d[11:7];
   assign read_addr = PC_f[11:0];
   assign en_f = en_d;
   assign en_d = en_e;
-  assign en_e = !hazard & en_m & !stall_div;
-  
+  assign en_e = !hazard&en_m & !stall_div;
   //assign en_m = !cpu_stall_o;
   //assign en_m = 1'b1;
-  //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)
   assign rst_n = (!PCSrc_e&!rst);
 
 endmodule
+

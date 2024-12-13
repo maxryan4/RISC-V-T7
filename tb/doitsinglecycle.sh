@@ -36,10 +36,8 @@ for file in "${files[@]}"; do
     # If verify.cpp -> we are testing the top module
     if [ $name == "verifysinglecycle.cpp" ]; then
         name="top"
-    fi
 
-    # Translate Verilog -> C++ including testbench
-    verilator   -Wall --trace \
+        verilator   -Wall --trace \
                 -cc ${RTL_FOLDER}/${name}.sv \
                 --exe ${file} \
                 -y ${RTL_FOLDER} \
@@ -47,19 +45,22 @@ for file in "${files[@]}"; do
                 -o Vdut \
                 -LDFLAGS "-lgtest -lgtest_main -lpthread" \
 
-      # Build C++ project with automatically generated Makefile
-      make -j -C obj_dir/ -f Vdut.mk
       
-      # Run executable simulation file
-      ./obj_dir/Vdut
-      
-      # Check if the test succeeded or not
-      if [ $? -eq 0 ]; then
-          ((passes++))
-      else
-          ((fails++))
-      fi
-      
+    
+
+        # Build C++ project with automatically generated Makefile
+        make -j -C obj_dir/ -f Vdut.mk
+        
+        # Run executable simulation file
+        ./obj_dir/Vdut
+        
+        # Check if the test succeeded or not
+        if [ $? -eq 0 ]; then
+            ((passes++))
+        else
+            ((fails++))
+        fi
+    fi      
   done
 
   # Exit as a pass or fail (for CI purposes)

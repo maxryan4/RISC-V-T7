@@ -9,10 +9,15 @@ module pc_top #(
     input   logic [DATA_WIDTH-1:0]  RS1,
     input   logic                   PCaddsrc,
     input   logic [DATA_WIDTH-1:0]  PC_e,
+    input   logic [DATA_WIDTH-1:0]  instr_f,
+    input   logic                   branch_actual_taken,    // checks if branch is actually taken
+    input   logic                   type_j,
+    input   logic [DATA_WIDTH-1:0]  PC_P4,
     output  logic [DATA_WIDTH-1:0]  PC,
     output  logic [DATA_WIDTH-1:0]  inc_PC,
-    //output  logic [DATA_WIDTH-1:0]  branch_target,      // branch prediction target             
-    //output  logic                   predict_taken       // branch prediction (1 = predict branch taken)
+    output  logic [DATA_WIDTH-1:0]  branch_target,      // branch prediction target             
+    output  logic                   predict_taken,       // branch prediction (1 = predict branch taken)
+    output  logic [DATA_WIDTH-1:0]  branch_pc_e
 );
 
     // internal signals
@@ -26,7 +31,7 @@ module pc_top #(
     mux mux_st (
         .in0(PC),
         .in1(next_PCX),
-        .sel(en_f),
+        .sel(en_f || PCsrc),
         .out(next_PC)
     );
 
@@ -54,20 +59,32 @@ module pc_top #(
         .in1(ImmOp),
         .out(branch_PC)
     );
-
+    wire [31:0] branch_PC_sel = branch_actual_taken ? branch_PC : PC_P4;
     mux pc_mux (
         .in0(branch_predict_PC),
-        .in1(branch_PC),
+        .in1(branch_PC_sel),
         .sel(PCsrc),
         .out(next_PCX)
     );
 
     mux branch_predict_mux (
         .in0(inc_PC),
-        .in1(32'b0),
-        .sel(1'b0),
+        .in1(branch_target),
+        .sel(predict_taken),
         .out(branch_predict_PC)
     );
 
-    
+    onebit_dynamic_branch_predictor dyn_bp (
+        .clk(clk),
+        .RD_f(instr_f),
+        .PC_f(PC),
+        .mispredict(PCsrc),
+        .branch_actual_taken(branch_actual_taken),
+        .branch_actual_target(branch_PC),
+        .type_j(type_j),
+        .predict_taken_f(predict_taken),
+        .branch_target_f(branch_target),
+        .branch_pc(PC_e)
+    );    
+    assign branch_pc_e = branch_PC;
 endmodule
