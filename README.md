@@ -24,7 +24,7 @@
 - Top Level File 
 
 ### Short Summary
-We finished two CPUs: a single circuit and a pipelined version, both designed purely in hardware. We also made a two set associative cache with write back. For extra credit, we additionally implemented PC dynamic branch prediction and we ran the programs on FPGA.
+We finished two CPUs: a single circuit and a pipelined version, both designed purely in hardware. We also made a two set associative cache with write back. For extra credit, we additionally implemented PC dynamic branch prediction and we ran the programs on FPGA. This is the pipelined branch, to see the single cycle branch go to the single_cycle branch
 
 ### Individual Statements:
 - [Personal Statement: Alexander Lewis](statements/Alex.md)
@@ -88,12 +88,12 @@ LEGEND:       `x` = full responsibility;  `p` = partial contribution.
 
 ### Evidence of Working Processor
 See the below videos for the F1 and PDF programs.
-
+#### F1
+![F1 test](statements/videos/F1.mp4)
 
 ### Implemented Instructions:
 All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
-#### F1
-![F1 test](statements/videos/F1.mp4)
+
 
 ### Further Improvements for Additional Credit
 - MUL and DIV instructions (for multiplication and division)
