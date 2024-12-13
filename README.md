@@ -89,8 +89,11 @@ LEGEND:       `x` = full responsibility;  `p` = partial contribution.
 ### Evidence of Working Processor
 See the below videos for the F1 and PDF programs.
 
+
 ### Implemented Instructions:
 All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
+#### F1
+![F1 test](statements/videos/F1.mp4)
 
 ### Further Improvements for Additional Credit
 - MUL and DIV instructions (for multiplication and division)
