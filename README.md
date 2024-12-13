@@ -27,11 +27,11 @@
 We finished two CPUs: a single circuit and a pipelined version, both designed purely in hardware. We also made a two set associative cache with write back. For extra credit, we additionally implemented PC dynamic branch prediction and we ran the programs on FPGA.
 
 ### Individual Statements:
-- [Personal Statement: Alexander Lewis](insert_link_here)
-- [Personal Statement: Ayuub Mohamud](nsert_link_here)
-- [Personal Statement: Max Ryan](nsert_link_here)
-- [Personal Statement: Mustafa Idris](nsert_link_here)
-- [Personal Statement: Ziqian Gao](nsert_link_here)
+- [Personal Statement: Alexander Lewis](statements/Alex.md)
+- [Personal Statement: Ayuub Mohamud](statements/Ayuub.md)
+- [Personal Statement: Max Ryan](statements/Max.md)
+- [Personal Statement: Mustafa Idris](statements/Mustafa.md)
+- [Personal Statement: Ziqian Gao](statements/Ziqian.md)
 
 ### Command Description
 | Commands                      | What does it do                                                                                           |
