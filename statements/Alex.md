@@ -4,7 +4,7 @@
 * [pc_reg.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_reg.sv)
 * [adder.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/adder.sv)
 * [pc_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_top.sv)
-* [F1.s](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/singlecycle/F1.S)
+* [F1.s](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S)
 * [vbuddytesting.cpp](https://github.com/maxryan4/RISC-V-T7/blob/F1/tb/tests/vbuddytesting.cpp)
 * [static_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/static_branch_predictor.sv)
 * [onebit_dynamic_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/onebit_dynamic_branch_predictor.sv)
@@ -31,7 +31,7 @@ The PCsrc signal in the block is the SELECT signal for the multiplexer which det
 
 The program counter logic remained almost the same for the pipelined version except a few signals were renamed. Additional logic was also implemented so that branch prediction could be added.
 
-## Writing the [F1 Assembly Code]() and [Testbench]()
+## Writing the [F1 Assembly Code](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S) and [Testbench](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/tests/vbuddyf1.cpp)
 
 Relevant commits:
 * [Add F1 test](https://github.com/maxryan4/RISC-V-T7/commit/ff76ae8fc893668e981b1b32b656944c87571cce#diff-25fb594f710cfe75ba264b9f7918b75b62dc4b911ea8c01fb9760e1d64e29dbaR6)
@@ -77,13 +77,13 @@ hang:
 
 This F1 assembly program was later modified by Max again to use the JAL instruction as required by the project brief, but the add and shift instructions in the latest version using JAL are all identical as in the above.
 
-I also wrote a simple [testbench](https://github.com/maxryan4/RISC-V-T7/blob/F1/tb/tests/vbuddytesting.cpp) for the F1 program including Vbuddy functionality. The relevant commit is at the top of this section.
+I also wrote a simple [testbench](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/tests/vbuddyf1.cpp) for the F1 program including Vbuddy functionality. The relevant commit is at the top of this section.
 
 
 ## Writing the [Static Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/static_branch_predictor.sv)
 
 Relevant commits:
-* [Static branch predictor fix]()
+* [Duplicate signal in static branch predictor](https://github.com/maxryan4/RISC-V-T7/commit/7585e7dabeb7bef33d22ff37737ed080026e57db)
 
 Without branch prediction, all branches are assumed to be not taken. This means with increased pipeline stages, there is a higher penalty due to flushing if a branch actually is taken. 
 
@@ -178,7 +178,7 @@ end
 ```
 If the branch was actually taken, the pred field would need to be incremented by one (assuming it wasn't already strongly taken: 11). Conversely, if the branch was not actually taken, the pred field would need to be decremented by one (assuming it wasn't already strongly not taken: 00). This would allow the predictor to update one of 4 different states so that future predictions are less likely to be mispredicted.
 
-## What I learned
+## What I learnt
 In this project, I developed my skills in hardware design with SystemVerilog as well as using Git and GitHub to collaborate together as a team. I also gained a good understanding of the RISC-V instructions and the instruction set is implemented to design a CPU. I went quite deep into udnerstanding branch instructions and how both static and dynamic branch prediction can be used to reduce the number of mispredictions and hence reduce the number of times the pipeline needs to be flushed.
 
 If I had more time, I would try to fully implement the additional logic needed in the ALU to use the 2-bit dynamic branch predictor in our design. I would also try to write of global branch predictor to relate the outcome of one branch with the outcomes of different branches in the program. 
