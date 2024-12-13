@@ -114,8 +114,6 @@ The code in every test case was repeated, I also noticed that I could achieve th
 
 The key difference is that the program is run for a certain number of clock cycles, if it is ran using test(), it may also stop early at the expected output. Otherwise, using runSimulation() for programs that hang when they are finished will also work perfectly fine. This signicantly improved the readability of my code, despite it doing almost the exact same thing.
 
-## Running the PDF program on Vbuddy
-
 
 
 ## What I learned
