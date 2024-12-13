@@ -193,6 +193,5 @@ I learnt how division is done across multiple clock cycles.
 
 
 ## If I had more time
-
-I would look at making it so that while the division is happening other instructions could run assuming there weren't any data dependencies.
-I would also look at doing out of order execution and adding floating point arithemetic.
+I would implement multi-cycle division properly and look at doing out of order execution while the division is happening.
+I would also look at doing out of order execution in general and adding floating point arithemetic.
