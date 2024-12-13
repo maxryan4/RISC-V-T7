@@ -89,7 +89,7 @@ LEGEND:       `x` = full responsibility;  `p` = partial contribution.
 ### Evidence of Working Processor
 See the below videos for the F1 and PDF programs.
 #### F1
-![F1 test](statements/videos/F1.mp4)
+https://github.com/maxryan4/RISC-V-T7/blob/main/statements/videos/F1.mp4
 
 ### Implemented Instructions:
 All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
