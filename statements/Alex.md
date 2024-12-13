@@ -118,6 +118,7 @@ JAL instructions are always taken as these are unconditional jumps.
 
 An additional multiplexer was also added to the `pc_top.sv` file to determine whether PC + 4 or the predicted branch target address would be used for the next instruction. Of course, if the prediction turned out to be wrong, the CPU would have to be flushed.
 
+
 ## Writing the [One-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/onebit_dynamic_branch_predictor.sv)
 
 Relevant commits:

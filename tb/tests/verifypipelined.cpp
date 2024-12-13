@@ -40,6 +40,24 @@ TEST_F(CpuTestbench, BaseProgramTest)
     }
 }
 
+TEST_F(CpuTestbench, MulTest)
+{
+    initializeInputs("multest");
+    compile("asm/singlecycle/multest.S");
+
+    bool success = false;
+    success = test(3, CYCLES); 
+
+    if (success)
+    {
+      SUCCEED();
+    }
+    else
+    { 
+      FAIL() << "2 tests were not passed during byte loading tests.";
+}
+}
+
 TEST_F(CpuTestbench, BranchProgramTest)
 {
     initializeInputs("branchtest");
