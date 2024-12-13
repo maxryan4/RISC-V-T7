@@ -7,9 +7,8 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 TEST_FOLDER=$(realpath "$SCRIPT_DIR/tests")
 
-PIPELINED_FOLDER=$(realpath "$SCRIPT_DIR/../rtl/pipelined-plus-cache")
-SINGLECYCLE_FOLDER=$(realpath "$SCRIPT_DIR/../rtl/single-cycle")
-RTL_FOLDER=$(realpath "$SCRIPT_DIR/../rtl/pipelined-plus-cache")
+PIPELINED_FOLDER=$(realpath "$SCRIPT_DIR/../rtl/")
+RTL_FOLDER=$(realpath "$SCRIPT_DIR/../rtl/")
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
