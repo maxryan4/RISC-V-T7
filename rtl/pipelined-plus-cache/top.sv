@@ -172,7 +172,7 @@ module top #(
   );
 
   // ------ Pipelining Hazard Unit ------ 
-  wire load_m = ResultSrc_m==2'd1;
+  wire load_m = ResultSrc_m==2'd1 || stall_div;
 
   hazard_unit hazard_unit1(
     .execute_reg(RS1_e),
@@ -440,7 +440,8 @@ mux UIMux(
   assign read_addr = PC_f[11:0];
   assign en_f = en_d;
   assign en_d = en_e;
-  assign en_e = !hazard&en_m & !stall_div;
+  assign en_e = !hazard & en_m & !stall_div;
+  
   //assign en_m = !cpu_stall_o;
   //assign en_m = 1'b1;
   //assign memCtrl = instr[14:12]; // this is already done in control_unit (i think)

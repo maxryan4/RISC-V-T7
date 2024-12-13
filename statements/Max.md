@@ -148,7 +148,10 @@ Implemented division in a single cycle.
 Using the system verilog / and % operators causes large blocks of hardware to be synthesised which will drastically lower the maximum clock speed of the CPU.
 
 #### Multicycle Division
-Implemented multicyle division which uses 32 cycles to do a single division operation. This means that the clock speed of the CPU won't be affected too much by the division hardware.
+Unfortunately this module does not work properly.
+I attempted to implement the restoring division algorithm.
+It should use 32 cycles to do a single division operation. 
+This means that the clock speed of the CPU won't be affected too much by the division hardware.
 In the divide by 0 case the quotient is the maximum value that can be stored based off of whether it was a signed or unsigned division.
 The remainder will be the value of the quotient as there is no actual meaningful result for the value of the quotient and you can't have a remainder that is larger than the quotient so I set the remainder to the value of the quotient.
 
@@ -180,7 +183,7 @@ end else begin
 end
 ```
 
-These 2 blocks of code are repeated 32 times and this will give the correct division result.
+These 2 blocks of code are repeated 32 times but unfortunately with the current implementation it does not give the correct result.
 
 ## What I learned
 I learnt alot about how to write SystemVerilog as well as gained a good understanding of the RISC-V instruction set and how you implement an instruction set to design a CPU.
