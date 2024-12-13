@@ -95,5 +95,5 @@ All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
 ### Further Improvements for Additional Credit
 - MUL and DIV instructions (for multiplication and division)
 - PC static and dynamic branch predictors
-- Implemented on FPGA
+- Complete RV32IM except for FENCE, ECALL, EBREAK and CSR.
 - Two set associative cache with write back functionality and spatial locality, communicating with main memory through a wishbone bus
