@@ -1,14 +1,14 @@
 # Alexander Lewis' Personal Statement
 
 ## Worked On
-* [pc_reg.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_reg.sv)
-* [adder.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/adder.sv)
-* [pc_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_top.sv)
+* [pc_reg.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pc_reg.sv)
+* [adder.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/adder.sv)
+* [pc_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pc_top.sv)
 * [F1.s](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S)
 * [vbuddyf1.cpp](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/tests/vbuddyf1.cpp)
-* [static_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/static_branch_predictor.sv)
-* [onebit_dynamic_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/onebit_dynamic_branch_predictor.sv)
-* [twobit_dynamic_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/twobit_dynamic_branch_predictor.sv)
+* [static_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/static_branch_predictor.sv)
+* [onebit_dynamic_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/onebit_dynamic_branch_predictor.sv)
+* [twobit_dynamic_branch_predictor.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/twobit_dynamic_branch_predictor.sv)
 
 
 
