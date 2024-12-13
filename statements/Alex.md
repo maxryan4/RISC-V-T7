@@ -118,20 +118,68 @@ JAL instructions are always taken as these are unconditional jumps.
 
 An additional multiplexer was also added to the `pc_top.sv` file to determine whether PC + 4 or the predicted branch target address would be used for the next instruction. Of course, if the prediction turned out to be wrong, the CPU would have to be flushed.
 
-## Writing the [One-Bit Dynamic Branch Predictor]()
+## Writing the [One-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/onebit_dynamic_branch_predictor.sv)
 
 Relevant commits:
-* []()
+* [1 and 2 bit branch predictor completed](https://github.com/maxryan4/RISC-V-T7/commit/78ae98f5369a5e1e045b057d43c94db9f342b506)
 
+I then wanted to improve the static branch predictor so wrote a 1-bit dynamic branch predictor. This uses historical information (past branches) to determine whether to predict the branch will or will not be taken.
 
+The 1 bit branch predictor uses a table of branch instructions with a 1-bit indicator that stores the most recent result (whether the last branch was or was not taken). Essentially, if the last branch instruction was taken, the it is predicted to be taken next time as well. This is essentially this 2-state state machine:
 
-## Writing the [Two-Bit Dynamic Branch Predictor]()
+<img src="images/1bit_pred_statemachine.png">
+
+The table that stores the outcome of the last branch instruction is called a branch target buffer.
+
+```verilog
+typedef struct packed {
+    logic                   valid;  // valid = 0 if BTB entry ignored in lookup
+    logic [DATA_WIDTH-7:0]  tag;    // stores upper bits of PC to check entry  is current PC
+    logic [DATA_WIDTH-1:0]  target; // target PC when branch taken
+    logic                   pred;   // 1 bit predictor counter: T (taken: 1), N (not taken: 0)
+    logic                   uncond; // uncond = 1 if *unconditional* jump
+} BTB_cols;
+```
+The BTB has a valid field to ensure the BTB entry is valid, a tag field to store the upper bits of the PC to check that the BTB entry matches, a target field which is the target PC when the branch is taken as well as a pred field which is 1 if the prediction is to take the branch, and 0 if not. Finally, there is an uncond field that specifies whether the jump is conditional (branch instruction) or unconditional (JAL instruction). I initially used 'type' instead of 'uncond' but 'type' is a SystemVerilog keywords so I renamed this.
+
+For each branch or JAL instruction, we then check if the corresponding entry in the table is valid and that the tag matches. If the jump is either unconditional or if that previous jump was taken, we predict that the branch/jump will be taken. If the jump was not taken last time, then we predict that the branch/jump won't be taken this time either.
+
+The BTB also gets updated if there is a misprediction, so that future branches can be more accurately predicted.
+
+Of course mispredictions mean the pipeline must be flushed so that the correct instruction is executed.
+
+## Writing the [Two-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/twobit_dynamic_branch_predictor.sv)
 
 Relevant commits:
-* []()
+* [1 and 2 bit branch predictor completed](https://github.com/maxryan4/RISC-V-T7/commit/78ae98f5369a5e1e045b057d43c94db9f342b506)
 
+The 2-bit dynamic branch predictor works in a similar way to the 1-bit but this time the pred field is 2 bits rather than 1 bit. If a branch is taken two or more times, the predictor is in the strongly taken state, denoted by 11. If a branch is not taken two or more times, the predictor is in the strongly not taken state, denoted by 00. If a branch is only taken once, the predictor is in the weakly taken state, 10, and similarly for weakly not taken. This is the state machine that it follows:
+
+<img src="images/2bit_pred_statemachine.png">
+
+In general, for 1-bit predictors will mispredict branches on the first and last iteration round a loop, whereas a 2-bit predictor will only mispredict once round the loop instead of twice.
+
+Unfortunately, in our final design, we use the 1-bit dynamic branch predictor instead of the 2-bit predictor, as additional logic would be needed as the ALU would need to be able to inform the branch predictor of any successful predictions, and not purely just mispredictions.
+
+I did however try writing up some code for what the logic could look like on the branch predictor side:
+
+```verilog
+// this updates 2 bit predictor
+if (branch_actual_taken) begin                  // if branch is actually taken
+    if (BTB[update_index].pred < 2'b11) begin   // and pred not already ST (11), increment by 1
+        BTB[update_index].pred <= BTB[update_index].pred + 2'b01;
+    end
+end else begin                                  // if branch is not actually taken
+    if (BTB[update_index].pred > 2'b00) begin   // and pred not already SN (00), decrement by 1
+        BTB[update_index].pred <= BTB[update_index].pred - 2'b01;
+    end
+end
+```
+If the branch was actually taken, the pred field would need to be incremented by one (assuming it wasn't already strongly taken: 11). Conversely, if the branch was not actually taken, the pred field would need to be decremented by one (assuming it wasn't already strongly not taken: 00). This would allow the predictor to update one of 4 different states so that future predictions are less likely to be mispredicted.
 
 ## What I learned
+In this project, I developed my skills in hardware design with SystemVerilog as well as using Git and GitHub to collaborate together as a team. I also gained a good understanding of the RISC-V instructions and the instruction set is implemented to design a CPU. I went quite deep into udnerstanding branch instructions and how both static and dynamic branch prediction can be used to reduce the number of mispredictions and hence reduce the number of times the pipeline needs to be flushed.
 
+If I had more time, I would try to fully implement the additional logic needed in the ALU to use the 2-bit dynamic branch predictor in our design. I would also try to write of global branch predictor to relate the outcome of one branch with the outcomes of different branches in the program. 
 
-## If I had more time
+Furthermore, I would look into and try to create a superscalar version so that more than one instruction could be executed at the same time, and develop that to an out-of-order superscalar processor which would allow instructions to be executed not in the original order. This would allow me to get a deeper understanding of how to analyse and avoid data dependencies.
