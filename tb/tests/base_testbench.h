@@ -21,7 +21,6 @@ public:
         tfp = std::make_unique<VerilatedVcdC>();
         Verilated::traceEverOn(true);
         top->trace(tfp.get(), 99);
-
 #endif
     }
 

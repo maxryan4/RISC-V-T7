@@ -8,7 +8,6 @@ module static_branch_predictor #(
     output logic predict_taken              // branch prediction (1 = predict branch taken)
 
 );
-
     logic [DATA_WIDTH-1:0] branch_target;   // target address of branch
 
     always_comb begin

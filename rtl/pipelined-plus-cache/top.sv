@@ -60,8 +60,6 @@ module top #(
   logic Branch_d;
   logic MemWrite_d;
   logic [4:0] Rd_w;
-  logic [DATA_WIDTH-1:0] RD1_d;
-  logic [DATA_WIDTH-1:0] RD2_d;
   logic [DATA_WIDTH-1:0] RD2_e;
   logic [4:0] Rd_d;
   logic [4:0] Rd_e;
@@ -397,7 +395,6 @@ mux UIMux(
 
 
   // ------ Memory stage ------
-
   
   wire mem_op_valid = (load_m|MemWrite_m)&valid_m;
   mem_top #(18, 64, 0) data_memory_cache (
@@ -458,4 +455,5 @@ mux UIMux(
   assign rst_n = (!PCSrc_e&!rst);
 
 endmodule
+
 

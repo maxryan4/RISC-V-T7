@@ -4,4 +4,8 @@ obj_dir/
 *.vcd
 *.hex
 a.out
+<<<<<<< HEAD
 a.out.reloc
+=======
+a.out.reloc
+>>>>>>> origin/main

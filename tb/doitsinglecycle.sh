@@ -36,7 +36,6 @@ for file in "${files[@]}"; do
     # If verify.cpp -> we are testing the top module
     if [ $name == "verifysinglecycle.cpp" ]; then
         name="top"
-
         verilator   -Wall --trace \
                 -cc ${RTL_FOLDER}/${name}.sv \
                 --exe ${file} \
@@ -45,7 +44,7 @@ for file in "${files[@]}"; do
                 -o Vdut \
                 -LDFLAGS "-lgtest -lgtest_main -lpthread" \
 
-      
+     
     
 
         # Build C++ project with automatically generated Makefile
