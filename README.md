@@ -91,7 +91,7 @@ See the below videos for the F1 and PDF programs.
 #### F1
 https://github.com/maxryan4/RISC-V-T7/blob/main/statements/videos/F1.mp4
 #### PDF Gaussian
-
+https://github.com/maxryan4/RISC-V-T7/blob/main/statements/videos/PDF.mp4
 ### Implemented Instructions:
 All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
 
