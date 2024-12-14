@@ -8,18 +8,18 @@ FINISH!!!!!!
 4. [Fourth Example](#fourth-examplehttpwwwfourthexamplecom)-->
 
 ## Worked on
-* [ALU.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/ALU.sv)
-* [register_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/register_file.sv)
-* [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/singlecycle/F1.S)
-* [top.sv (pipelined version)](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/top.sv)
-* [fetch_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/fetch_reg_file.sv)
-* [decode_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/decode_reg_file.sv)
-* [execute_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/execute_reg_file.sv)
-* [mem_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/mem_reg_file.sv)
-* [ALU_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/ALU_top.sv)
-* [mul.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/mul.sv)
-* [div_sc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_sc.sv)
-* [div_mc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_mc.sv)
+* [ALU.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/ALU.sv)
+* [register_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/register_file.sv)
+* [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/F1.S)
+* [top.sv (pipelined version)](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/top.sv)
+* [fetch_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/fetch_reg_file.sv)
+* [decode_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/decode_reg_file.sv)
+* [execute_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/execute_reg_file.sv)
+* [mem_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/mem_reg_file.sv)
+* [ALU_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/ALU_top.sv)
+* [mul.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/mul.sv)
+* [div_sc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/div_sc.sv)
+* [div_mc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/div_mc.sv)
 
 ## Creating the [ALU.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/ALU.sv) file
 
@@ -88,11 +88,11 @@ increment:
 ```
 
 ## Adding pipelining
-* [top.sv (pipelined version)](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/top.sv)
-* [fetch_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/fetch_reg_file.sv)
-* [decode_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/decode_reg_file.sv)
-* [execute_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/execute_reg_file.sv)
-* [mem_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/mem_reg_file.sv)
+* [top.sv (pipelined version)](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/top.sv)
+* [fetch_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/fetch_reg_file.sv)
+* [decode_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/decode_reg_file.sv)
+* [execute_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/execute_reg_file.sv)
+* [mem_reg_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/mem_reg_file.sv)
 
 Relevant commits:
 * [Added the register files and modified top file and modified various other files to correctly implement pipelining](https://github.com/maxryan4/RISC-V-T7/commit/22f02ac5bdd790da685f5c0b23684fa1ec3e70a5)
@@ -113,10 +113,10 @@ They also have a valid signal which means that the data won't propogate if it is
 
 
 ## RV32M Instructions
-* [ALU_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/ALU_top.sv)
-* [mul.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/mul.sv)
-* [div_sc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_sc.sv)
-* [div_mc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/div_mc.sv)
+* [ALU_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/ALU_top.sv)
+* [mul.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/mul.sv)
+* [div_sc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/div_sc.sv)
+* [div_mc.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/div_mc.sv)
 
 Relevant commits:
 * [Added modules](https://github.com/maxryan4/RISC-V-T7/commit/61314412002fe7c88f66d08441eb04fa869064fd)
