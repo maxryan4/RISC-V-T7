@@ -12,7 +12,7 @@
 
 
 
-## Creating the [Program Counter](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_top.sv)
+## Creating the [Program Counter](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pc_top.sv)
 
 Relevant commits:
 * [Program Counter](https://github.com/maxryan4/RISC-V-T7/commit/4510ebb31ba23ddbe547dc829a456922f848d8f9#diff-a84ae2422af29ec54b49ab60bde228049231ad78d4fdcfffb583808697a55ecdR9)
@@ -21,7 +21,7 @@ I made the program counter components for lab 4 which just consisted of a 32 bit
 
 <img src="images/pc.png" width=300 height=250>
 
-I then instantiated the adders, the MUX and the register in a top file for the program counter block in a file called [pc_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/single-cycle/pc_top.sv).
+I then instantiated the adders, the MUX and the register in a top file for the program counter block in a file called [pc_top.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pc_top.sv).
 
 For most instructions, the program counter increments by 4 bits. This is because RISC-V uses byte-addressable memory and hence each 32-bit word occupies 4 bytes where each byte has a unique address. Therefore, the program counter is usually incremented by 4 each cycle.
 
@@ -31,7 +31,7 @@ The PCsrc signal in the block is the SELECT signal for the multiplexer which det
 
 The program counter logic remained almost the same for the pipelined version except a few signals were renamed. Additional logic was also implemented so that branch prediction could be added.
 
-## Writing the [F1 Assembly Code](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S) and [Testbench](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/tests/vbuddyf1.cpp)
+## Writing the [F1 Assembly Code](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S) and [Testbench](https://github.com/maxryan4/RISC-V-T7/blob/F1/tb/tests/vbuddytesting.cpp)
 
 Relevant commits:
 * [Add F1 test](https://github.com/maxryan4/RISC-V-T7/commit/ff76ae8fc893668e981b1b32b656944c87571cce#diff-25fb594f710cfe75ba264b9f7918b75b62dc4b911ea8c01fb9760e1d64e29dbaR6)
@@ -77,10 +77,10 @@ hang:
 
 This F1 assembly program was later modified by Max again to use the JAL instruction as required by the project brief, but the add and shift instructions in the latest version using JAL are all identical as in the above.
 
-I also wrote a simple [testbench](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/tests/vbuddyf1.cpp) for the F1 program including Vbuddy functionality. The relevant commit is at the top of this section.
+I also wrote a simple [testbench](https://github.com/maxryan4/RISC-V-T7/blob/F1/tb/tests/vbuddytesting.cpp) for the F1 program including Vbuddy functionality. The relevant commit is at the top of this section.
 
 
-## Writing the [Static Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/static_branch_predictor.sv)
+## Writing the [Static Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/static_branch_predictor.sv)
 
 Relevant commits:
 * [Duplicate signal in static branch predictor](https://github.com/maxryan4/RISC-V-T7/commit/7585e7dabeb7bef33d22ff37737ed080026e57db)
@@ -119,7 +119,7 @@ JAL instructions are always taken as these are unconditional jumps.
 An additional multiplexer was also added to the `pc_top.sv` file to determine whether PC + 4 or the predicted branch target address would be used for the next instruction. Of course, if the prediction turned out to be wrong, the CPU would have to be flushed.
 
 
-## Writing the [One-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/onebit_dynamic_branch_predictor.sv)
+## Writing the [One-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/onebit_dynamic_branch_predictor.sv)
 
 Relevant commits:
 * [1 and 2 bit branch predictor completed](https://github.com/maxryan4/RISC-V-T7/commit/78ae98f5369a5e1e045b057d43c94db9f342b506)
@@ -149,7 +149,7 @@ The BTB also gets updated if there is a misprediction, so that future branches c
 
 Of course mispredictions mean the pipeline must be flushed so that the correct instruction is executed.
 
-## Writing the [Two-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/pipelined-plus-cache/twobit_dynamic_branch_predictor.sv)
+## Writing the [Two-Bit Dynamic Branch Predictor](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/twobit_dynamic_branch_predictor.sv)
 
 Relevant commits:
 * [1 and 2 bit branch predictor completed](https://github.com/maxryan4/RISC-V-T7/commit/78ae98f5369a5e1e045b057d43c94db9f342b506)
