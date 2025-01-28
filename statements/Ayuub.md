@@ -63,7 +63,7 @@ The ```cpu_valid_i``` signal is high whenever the CPU makes a memory request, wi
 #### Cache architecture
 The cache architecture for the direct mapped cache is as below:
 
-![Example of Direct Mapped Cache](cache.svg)
+![Example of Direct Mapped Cache](images/cache.svg)
 
 The cache contains the data, tags, valid and dirty bits (in the case of the write back caches) for every cache line. If the memory operation is a load: if the tag derived from the PC and the tag present in the cache match, it is a cache hit, cpu_en_o is high and the data is provided over cpu_data_o. 
 
@@ -83,7 +83,7 @@ Set-associative caches try to solve this by increasing their capacity for confli
 
 The cache line size is configurable inside the cache using the ```CACHE_LINE_SIZE_MULT_POW2``` parameter, allowing for spatial and temporal locality.
 #### Wishbone Bus
-![Example of Wishbone Bus](wb.drawio.svg)
+![Example of Wishbone Bus](images/wb.drawio.svg)
 
 The Wishbone B4 is a simple, open-standard hardware bus allowing different computer components to communicate to each other.
 
