@@ -34,11 +34,22 @@ mul mul (
     .result(mul_result)
 );
 
-div_sc div_sc (
-    .op1(ALUop1),
-    .op2(ALUop2),
-    .div_ctrl(ALUctrl[2:0]),
-    .result(div_result)
+// div_sc div_sc (
+//     .op1(ALUop1),
+//     .op2(ALUop2),
+//     .div_ctrl(ALUctrl[2:0]),
+//     .result(div_result)
+// );
+
+div_mc div_mc (
+    .clk(clk),
+    .start(ALUctrl[2]), // MSB of func3 determines if it is a div or not
+    .dividend(ALUop1),
+    .divisor(ALUop2),
+    .signed_op(ALUctrl[0]), // func3[0] determines if it is a signed division (1 if signed, 0 if not signed)
+    .quotient(quotient),
+    .remainder(remainder),
+    .ready(div_ready) // 1 if division is ready
 );
 
 
