@@ -52,7 +52,6 @@ div_mc div_mc (
     .ready(div_ready) // 1 if division is ready
 );
 
-
 mux mul_or_div (
     .in0(mul_result),
     .in1(div_result),
