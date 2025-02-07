@@ -167,10 +167,9 @@ However using the SystemVerilog / and % operators causes large blocks of hardwar
 
 #### Multicycle Division
 
-Unfortunately this module does not work properly.
-I attempted to implement the restoring division algorithm for division.
-It should use 32 cycles to do a single division operation.
-This means that the clock speed of the CPU won't be affected too much by the division hardware.
+Uses the restoring division algorithm for division.
+It takes 32 cycles to do a single division operation.
+This means that the clock speed of the CPU won't be affected too much by the division hardware which if you wanted to do in one cycle would be very a very large module physically.
 In the divide by 0 case the quotient is the maximum value that can be stored based off of whether it was a signed or unsigned division.
 The remainder will be the value of the quotient as there is no actual meaningful result for the value of the quotient and you can't have a remainder that is larger than the quotient so I set the remainder to the value of the quotient.
 
@@ -185,23 +184,24 @@ Then the dividend_reg is shifted left by 1.
 This effectively removes the already processed MSB and shifts the next bit up for processing.
 
 ```Verilog
-remainder_reg <= {remainder_reg[30:0], dividend_reg[31]};
-dividend_reg <= {dividend_reg[30:0], 1'b0};
+temp_reg = {remainder_reg[DATA_WIDTH-2:0], dividend_reg[DATA_WIDTH-1]};
+dividend_reg <= {dividend_reg[DATA_WIDTH-2:0], 1'b0}
 ```
 
-Then if remainder_reg is larger than divisor_reg remainder_reg is set to remainder_reg - divisor_reg.
+Then if temp_reg is larger than divisor_reg remainder_reg is set to remainder_reg - divisor_reg.
 This is just like in normal long division.
 Then the quotient is shifted left by 1 with its LSB being set to 1.
 Otherwise the quotient_reg is shifted left.
 This is done to build the quotient correctly based off of whether the divisor fitted into remainder_reg.
 
 ```Verilog
-if (remainder_reg >= divisor_reg) begin
-    remainder_reg <= remainder_reg - divisor_reg;
-    quotient_reg <= {quotient_reg[30:0], 1'b1};
+if (temp_reg >= divisor_reg) begin
+    remainder_reg <= temp_reg - divisor_reg;
+    quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b1};
 end 
 else begin
-    quotient_reg <= {quotient_reg[30:0], 1'b0};
+    quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b0};
+    remainder_reg <= temp_reg;
 end
 ```
 
@@ -214,8 +214,7 @@ From doing the pipelined version of the top file I gained a very thorough unders
 This also enabled me to understand how pipelining is actually implemented.
 I learnt about various methods of implementing division in a CPU.
 
-
 ## If I had more time
 
-I would implement multi-cycle division properly and look at doing out of order execution while the division is happening.
+I would look at doing out of order execution while the division is happening.
 I would also look at doing out of order execution in general and adding floating point arithmetic.
