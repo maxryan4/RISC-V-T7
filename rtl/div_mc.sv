@@ -16,6 +16,7 @@ logic [DATA_WIDTH-1:0] dividend_reg;
 logic [DATA_WIDTH-1:0] divisor_reg;
 logic [DATA_WIDTH-1:0] quotient_reg;
 logic [DATA_WIDTH-1:0] remainder_reg;
+logic [DATA_WIDTH-1:0] temp_reg;
 logic [5:0]  count;
 logic sign_dividend;
 logic sign_result;
@@ -61,15 +62,16 @@ always_ff @(posedge clk) begin
     end
     else if (busy) begin
         if (count < 32) begin // division is in progress
-            remainder_reg <= {remainder_reg[DATA_WIDTH-2:0], dividend_reg[DATA_WIDTH-1]};
+            temp_reg = {remainder_reg[DATA_WIDTH-2:0], dividend_reg[DATA_WIDTH-1]};
             dividend_reg <= {dividend_reg[DATA_WIDTH-2:0], 1'b0};
             
-            if (remainder_reg >= divisor_reg) begin
-                remainder_reg <= remainder_reg - divisor_reg;
+            if (temp_reg >= divisor_reg) begin
+                remainder_reg <= temp_reg - divisor_reg;
                 quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b1};
             end 
             else begin
                 quotient_reg <= {quotient_reg[DATA_WIDTH-2:0], 1'b0};
+                remainder_reg <= temp_reg;
             end
 
             count <= count + 1;
