@@ -2,31 +2,38 @@
 
 ## Table of Contents
 
-### Processor 
+### Processor
 
 #### Single Cycle
-- F1 Program 
+
+- F1 Program
 - Program Counter & Instruction Memory
-- Control Unit 
-- ALU 
-- Data Memory 
+- Control Unit
+- ALU
+- Data Memory
 
 #### Pipelining
+
 - Pipeline Programs For Pipelined CPUs
 
 #### Data Cache
+
 - Data Cache
 
-#### Others 
+#### Others
+
 - Result Verification
 
-#### Top-Level 
-- Top Level File 
+#### Top-Level
+
+- Top Level File
 
 ### Short Summary
-We finished two CPUs: a single circuit and a pipelined version, both designed purely in hardware. We also made a two set associative cache with write back. For extra credit, we additionally implemented PC dynamic branch prediction and we ran the programs on FPGA. This is the pipelined branch, to see the single cycle branch go to the single_cycle branch
+
+We finished two CPUs: a single circuit and a pipelined version, both designed purely in hardware. We also made a two way set associative cache with write back. For extra credit, we additionally implemented PC dynamic branch prediction and created a multiplication and division unit that uses multicycle division. This is the pipelined branch, to see the single cycle branch go to the single_cycle branch.
 
 ### Individual Statements:
+
 - [Personal Statement: Alexander Lewis](statements/Alex.md)
 - [Personal Statement: Ayuub Mohamud](statements/Ayuub.md)
 - [Personal Statement: Max Ryan](statements/Max.md)
@@ -34,6 +41,7 @@ We finished two CPUs: a single circuit and a pipelined version, both designed pu
 - [Personal Statement: Ziqian Gao](statements/Ziqian.md)
 
 ### Command Description
+
 | Commands                      | What does it do                                                                                           |
 | :---------------------------: | :------------------------------------------------------------------------------------------------------:  | 
 |   ./tb/doitf1.sh              | Runs the F1 program and outputs the result onto the Vbuddy.                                               |                      
@@ -87,16 +95,23 @@ We finished two CPUs: a single circuit and a pipelined version, both designed pu
 LEGEND:       `x` = full responsibility;  `p` = partial contribution.
 
 ### Evidence of Working Processor
+
 See the below videos for the F1 and PDF programs.
+
 #### F1
+
 https://github.com/maxryan4/RISC-V-T7/blob/main/statements/videos/F1.mp4
+
 #### PDF Gaussian
+
 https://github.com/maxryan4/RISC-V-T7/blob/main/statements/videos/PDF.mp4
+
 ### Implemented Instructions:
+
 All instructions specified in RV32IM except for FENCE, ECALL, EBREAK and CSR.
 
-
 ### Further Improvements for Additional Credit
+
 - MUL and DIV instructions (for multiplication and division)
 - PC static and dynamic branch predictors
 - Complete RV32IM except for FENCE, ECALL, EBREAK and CSR.

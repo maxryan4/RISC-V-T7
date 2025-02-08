@@ -31,20 +31,18 @@ Relevant commits:
 The ALU needed to be able to handle R, I and B-type instructions.
 The R-type instructions are arithmetic instructions between two registers.
 The I-type instructions are arithmetic instructions between the value in a register and an immediate.
-The B-type instructions determine whether or not to branch based off of the relation between 2 registers such as if they are equal. 
+The B-type instructions determine whether or not to branch based off of the relation between 2 registers such as if they are equal.
 If the condition that is being tested holds it branches to PC + offset.
 
 ![instr_map1](images/instr_map1.png)
 
-In order to do this I used bit 6 of func7 and all 3 bits of func3 to form the 4-bit ALUctrl signal. 
+In order to do this I used bit 6 of func7 and all 3 bits of func3 to form the 4-bit ALUctrl signal.
 This is then used to determine which instructions is used and so what the ALU output should be.
-The only exception to this is for addi instructions. 
+The only exception to this is for addi instructions.
 Due to the fact that the the imm part of I-type instructions overlaps with func7 so for addi there was a chance that it would be interpreted as a sub instruction as so in the control unit if is an addi instruction it sets the func7[5] part of ALUctrl to 0 so that the ALU interprets it correctly.
 
 For branch instructions the type of branch instruction is determined by the func3 part of the instruction.
 So depending on the value of func3 a different comparison is made between the two input operands and if the comparison is true EQ is set high which tells the control unit that it should branch.
-
-
 
 ## Creating the [register_file.sv](https://github.com/maxryan4/RISC-V-T7/blob/main/rtl/register_file.sv) file
 
@@ -52,9 +50,8 @@ Relevant commits:
 
 * [Added register file](https://github.com/maxryan4/RISC-V-T7/commit/dca6e6a73b0347808aadeab3682befb48d18ad23)
 
-The register file has an output a0 which is register a0 so that it can be read by the testbench. 
+The register file has an output a0 which is register a0 so that it can be read by the testbench.
 For the pipelined version of the register file it is written to on the falling edge of the clock.
-
 
 ## Creating [F1.S](https://github.com/maxryan4/RISC-V-T7/blob/main/tb/asm/other/F1.S)
 
@@ -110,7 +107,6 @@ Created a register file between each stage to pass data from one stage to the ne
 
 Added extra input and output signals to PC_top.sv and control_unit.sv in order to properly implement the pipeline.
 
-
 ### Top File
 
 Connected the different stages together via the pipelining registers.
@@ -120,8 +116,6 @@ Connected the different stages together via the pipelining registers.
 The pipeline registers have a reset which is negative edge triggered which can be used to flush the pipelining registers.
 They have an enable pin which can be used to stall the pipeline if it is set low.
 They also have a valid signal which means that the data won't propogate if it isn't valid although the valid signal will still propagate through the pipeline.
-
-
 
 ## RV32M Instructions
 
@@ -134,7 +128,6 @@ Relevant commits:
 
 * [Added modules](https://github.com/maxryan4/RISC-V-T7/commit/61314412002fe7c88f66d08441eb04fa869064fd)
 * [Implemented modules in top file](https://github.com/maxryan4/RISC-V-T7/commit/81c52c323b3c867a64cdecd1d04e0d2c173b261f)
-
 
 ![instr_map2](images/instr_map2.png)
 ![RV32M_instr](images/RV32M_instr.png)
@@ -170,11 +163,12 @@ However using the SystemVerilog / and % operators causes large blocks of hardwar
 Uses the restoring division algorithm for division.
 It takes 32 cycles to do a single division operation.
 This means that the clock speed of the CPU won't be affected too much by the division hardware which if you wanted to do in one cycle would be very a very large module physically.
+
 In the divide by 0 case the quotient is the maximum value that can be stored based off of whether it was a signed or unsigned division.
 The remainder will be the value of the quotient as there is no actual meaningful result for the value of the quotient and you can't have a remainder that is larger than the quotient so I set the remainder to the value of the quotient.
 
 Since division takes 32 cycles to complete with this implementation the pipeline has to be stalled until the result is ready.
-This is necessary because if the pipeline wasn't stalled you would have to insert NOPs or the same instruction 32 times
+This is necessary because if the pipeline wasn't stalled you would have to insert NOPs or the same instruction 32 times.
 
 In order to do the division I used an iterative approach.
 
@@ -205,7 +199,7 @@ else begin
 end
 ```
 
-These 2 blocks of code are repeated 32 times but unfortunately with the current implementation it does not give the correct result.
+These 2 blocks of code are repeated 32 times giving the correct result at the end.
 
 ## What I learned
 
