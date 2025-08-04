@@ -17,35 +17,35 @@ module mem_top #(
     output       logic [31:0]       cpu_data_o,
     output       logic              cpu_en_o
 );
-wire logic              wb_stall_i;
-wire logic              wb_ack_i;
-wire logic [31:0]       wb_dat_i;
-wire logic              wb_err_i;
-wire logic              wb_cyc_o;
-wire logic              wb_stb_o;
-wire logic              wb_we_o;
-wire logic [AW-1:0]     wb_adr_o;
-wire logic [31:0]       wb_dat_o;
-wire logic [3:0]        wb_sel_o;
+wire logic              stall_i;
+wire logic              ack_i;
+wire logic [31:0]       dat_i;
+wire logic              err_i;
+wire logic              cyc_o;
+wire logic              stb_o;
+wire logic              we_o;
+wire logic [AW-1:0]     adr_o;
+wire logic [31:0]       dat_o;
+wire logic [3:0]        sel_o;
     two_way_set_assoc_cache_wb #(SETS, CACHE_LINE_SIZE_MULT_POW2, AW) cache0 (cpu_clock_i,
     cpu_addr_i,
     cpu_data_i,
     cpu_mem_ctrl_i,
     cpu_mem_write_i,
     cpu_valid_i,
-    wb_stall_i,
-    wb_ack_i,
-    wb_dat_i,
-    wb_err_i,
+    stall_i,
+    ack_i,
+    dat_i,
+    err_i,
     cpu_data_o,
     cpu_en_o,
-    wb_cyc_o,
-    wb_stb_o,
-    wb_we_o,
-    wb_adr_o,
-    wb_dat_o,
-    wb_sel_o);
+    cyc_o,
+    stb_o,
+    we_o,
+    adr_o,
+    dat_o,
+    sel_o);
 
-    wb_mem #(AW, 32, FILE_LOAD, FILE) memory (cpu_clock_i, 1'b0, wb_cyc_o, wb_stb_o, wb_we_o, wb_adr_o, wb_dat_o, wb_sel_o, wb_stall_i, wb_ack_i, wb_dat_i, wb_err_i);
+    ext_mem #(AW, 32, FILE_LOAD, FILE) memory (cpu_clock_i, 1'b0, cyc_o, stb_o, we_o, adr_o, dat_o, sel_o, stall_i, ack_i, dat_i, err_i);
 
 endmodule

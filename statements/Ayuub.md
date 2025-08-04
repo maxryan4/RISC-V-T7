@@ -10,7 +10,7 @@
       - [Summary](#summary-3)
       - [Cache interface](#cache-interface)
       - [Cache architecture](#cache-architecture)
-      - [Wishbone Bus](#wishbone-bus)
+      - [Pipelined Bus](#wishbone-bus)
       - [Main memory](#main-memory)
   - [Self-Reflections](#self-reflections)
     - [What I've learnt from this project](#what-ive-learnt-from-this-project)
@@ -25,7 +25,7 @@
 ## Summary
 - Within this project, I was responsible for the memory and cache system.
 - I implemented data_memory.sv, load_format.sv and store_format.sv modules in the single cycle version of the CPU to support the implementation of all RISC-V memory instructions (lb, lbu, lh, lhu, lw, sb, sh, sw).
-- In the pipelined version of the processor, I also implemented all 4 types of caches present representing all combinations of write-through/write-back and direct-mapped/two-way cache policies, alongside implementing a wishbone memory peripheral. 
+- In the pipelined version of the processor, I also implemented all 4 types of caches present representing all combinations of write-through/write-back and direct-mapped/two-way cache policies, alongside implementing a external memory peripheral. 
 - I also aided in the verification process of the CPU helping Mustafa.
 ## Major Contributions
 ### Data memory (#1)
@@ -82,36 +82,31 @@ A direct mapped cache stores one set of tags and valid bits as it can only store
 Set-associative caches try to solve this by increasing their capacity for conflicts, by allowing N tags for 1 index. This is done in the two way caches used in this processor by storing two sets of tags and valid bits, one for way 1, and the other for way 2. Then setting the top bit of the ram read address/write address to the way that it is in (0 for way 1, 1 for way 2).
 
 The cache line size is configurable inside the cache using the ```CACHE_LINE_SIZE_MULT_POW2``` parameter, allowing for spatial and temporal locality.
-#### Wishbone Bus
-![Example of Wishbone Bus](images/wb.drawio.svg)
+#### Pipelined Bus
+![Example of Pipelined Bus](images/pm.drawio.svg)
 
-The Wishbone B4 is a simple, open-standard hardware bus allowing different computer components to communicate to each other.
-
-Wishbone B4 has a number of favourable advantages:
+A pipelined half-duplex bus has a number of favourable advantages:
   - It has a very low pin count due to it's simple half-duplex communication (can do a only one read or one write exclusive of each other).
   - Whilst doing so it supports high frequency operation due to the use of a stall signal and clocked logic to enable lower logic delays.
   - It contains a byte select line, allowing for bit-masks to be used to allow for bytes and halfwords to be stored without discarding unselected bytes.
 
 From the perspective of the peripheral:
-- ```wb_cyc_i``` indicates the current clock cycle is a active clock cycle.
-- ```wb_stb_i``` tells the peripheral that an active request is underway.
-- ```wb_adr_i``` selects the address of the operation (not byte aligned but bus word aligned).
-- ```wb_dat_i``` gives the peripheral data to store if ```wb_we_i``` is high.
-- ```wb_sel_i``` tells the peripheral which bytes in a word to overwrite.
-- ```wb_ack_o``` tells the device driving the peripheral if the request has been acknowledged.
-- ```wb_err_o``` tells the device driving the peripheral if an error occurred.
-- ```wb_stall_o``` tells the device driving the peripheral if it has stalled in a request.
-- ```wb_dat_o``` represents data read from the peripheral.
+- ```cyc_i``` indicates the current clock cycle is a active clock cycle.
+- ```stb_i``` tells the peripheral that an active request is underway.
+- ```adr_i``` selects the address of the operation (not byte aligned but bus word aligned).
+- ```dat_i``` gives the peripheral data to store if ```wb_we_i``` is high.
+- ```sel_i``` tells the peripheral which bytes in a word to overwrite.
+- ```ack_o``` tells the device driving the peripheral if the request has been acknowledged.
+- ```err_o``` tells the device driving the peripheral if an error occurred.
+- ```stall_o``` tells the device driving the peripheral if it has stalled in a request.
+- ```dat_o``` represents data read from the peripheral.
 
-Wishbone B4 is used to communicate with the main memory module.
-
-#### Main memory
-The main memory peripheral uses Wishbone B4 to communicate with the cache, as per above.
+This pipelined bus is used to communicate with the main memory peripheral.
 
 ## Self-Reflections
 ### What I've learnt from this project
 - I've learnt about implementing write-back caches.
-- I've learnt about external bus communication using Wishbone B4.
+- I've learnt about external bus communication.
 - I've improved my debugging skills by aiding in the verification process of the CPU.
 - I've improved my communication skills in group projects, a vital skill I gained whilst aiding in verification as I needed to communicate well with other team members to get the verification done.
 - I've learnt RISC-V32I at a deeper level.
@@ -119,4 +114,4 @@ The main memory peripheral uses Wishbone B4 to communicate with the cache, as pe
 ### What I would've done
 - I would've looked into implementing atomic operations.
 - I would've implemented interrupts and exceptions, and improved the control unit so that it can detect illegal instructions.
-- My initial tests were not able to catch a weird bug (which the testbench provided by Mustafa could), where an uncached store in the write-back caches would cause a write to the wishbone peripheral with the byte select lanes all zero. This shows there is a need to improve my verification capacity.
+- My initial tests were not able to catch a weird bug (which the testbench provided by Mustafa could), where an uncached store in the write-back caches would cause a write to the memory peripheral with the byte select lanes all zero. This shows there is a need to improve my verification capacity.
